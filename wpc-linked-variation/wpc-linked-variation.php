@@ -3,21 +3,23 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.2.6
+Version: 4.2.7
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
 Domain Path: /languages/
 Requires Plugins: woocommerce
 Requires at least: 4.0
-Tested up to: 6.6
+Tested up to: 6.7
 WC requires at least: 3.0
-WC tested up to: 9.3
+WC tested up to: 9.4
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.2.6' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.2.7' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -755,22 +757,22 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                 </div>
 							<?php } ?>
                         </div><!-- /.wpclever_settings_page_content -->
-			            <div class="wpclever_settings_page_suggestion">
-			                <div class="wpclever_settings_page_suggestion_label">
-			                    <span class="dashicons dashicons-yes-alt"></span> Suggestion
-			                </div>
-			                <div class="wpclever_settings_page_suggestion_content">
-			                    <div>
-			                        To display custom engaging real-time messages on any wished positions, please install
-			                        <a href="https://wordpress.org/plugins/wpc-smart-messages/" target="_blank">WPC Smart Messages</a> plugin. It's free!
-			                    </div>
-			                    <div>
-			                        Wanna save your precious time working on variations? Try our brand-new free plugin
-			                        <a href="https://wordpress.org/plugins/wpc-variation-bulk-editor/" target="_blank">WPC Variation Bulk Editor</a> and
-			                        <a href="https://wordpress.org/plugins/wpc-variation-duplicator/" target="_blank">WPC Variation Duplicator</a>.
-			                    </div>
-			                </div>
-			            </div>
+                        <div class="wpclever_settings_page_suggestion">
+                            <div class="wpclever_settings_page_suggestion_label">
+                                <span class="dashicons dashicons-yes-alt"></span> Suggestion
+                            </div>
+                            <div class="wpclever_settings_page_suggestion_content">
+                                <div>
+                                    To display custom engaging real-time messages on any wished positions, please install
+                                    <a href="https://wordpress.org/plugins/wpc-smart-messages/" target="_blank">WPC Smart Messages</a> plugin. It's free!
+                                </div>
+                                <div>
+                                    Wanna save your precious time working on variations? Try our brand-new free plugin
+                                    <a href="https://wordpress.org/plugins/wpc-variation-bulk-editor/" target="_blank">WPC Variation Bulk Editor</a> and
+                                    <a href="https://wordpress.org/plugins/wpc-variation-duplicator/" target="_blank">WPC Variation Duplicator</a>.
+                                </div>
+                            </div>
+                        </div>
                     </div>
 					<?php
 				}
@@ -936,11 +938,11 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 						$_product = wc_get_product( $product_id );
 					}
 
-					if ( ! $_product ) {
+					if ( ! $_product || ! is_a( $_product, 'WC_Product' ) ) {
 						return;
 					}
 
-					$link_data = self::get_linked_data( $product_id );
+					$link_data = self::get_linked_data( $_product );
 
 					if ( empty( $link_data ) ) {
 						return;
@@ -1234,8 +1236,10 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 					}
 				}
 
-				public static function get_linked_data( $product_id ) {
-					$links = get_posts( [
+				public static function get_linked_data( $product ) {
+					$product_id  = $product->get_id();
+					$linked_data = false;
+					$links       = get_posts( [
 						'post_type'      => 'wpclv',
 						'post_status'    => 'publish',
 						'posts_per_page' => - 1, // get all linked
@@ -1253,7 +1257,8 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 									$product_ids = explode( ',', $link['products'] );
 
 									if ( in_array( $product_id, $product_ids ) ) {
-										return $link;
+										$linked_data = $link;
+										break;
 									}
 								}
 
@@ -1261,7 +1266,8 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 									$categories = array_map( 'trim', explode( ',', $link['categories'] ) );
 
 									if ( has_term( $categories, 'product_cat', $product_id ) ) {
-										return $link;
+										$linked_data = $link;
+										break;
 									}
 								}
 
@@ -1269,14 +1275,15 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 									$tags = array_map( 'trim', explode( ',', $link['tags'] ) );
 
 									if ( has_term( $tags, 'product_tag', $product_id ) ) {
-										return $link;
+										$linked_data = $link;
+										break;
 									}
 								}
 							}
 						}
 					}
 
-					return false;
+					return apply_filters( 'wpclv_get_linked_data', $linked_data, $product );
 				}
 
 				// return post id
