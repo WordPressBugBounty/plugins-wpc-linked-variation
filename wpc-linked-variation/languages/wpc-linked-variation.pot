@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPC Linked Variation for WooCommerce 4.2.7\n"
+"Project-Id-Version: WPC Linked Variation for WooCommerce 4.2.8\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wpc-linked-variation\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-11-14T09:32:29+00:00\n"
+"POT-Creation-Date: 2024-11-21T09:16:22+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: wpc-linked-variation\n"
@@ -226,7 +226,7 @@ msgid "Settings updated."
 msgstr ""
 
 #: wpc-linked-variation.php:565
-#: wpc-linked-variation.php:1323
+#: wpc-linked-variation.php:1327
 msgid "Settings"
 msgstr ""
 
@@ -235,12 +235,12 @@ msgid "Localization"
 msgstr ""
 
 #: wpc-linked-variation.php:571
-#: wpc-linked-variation.php:1324
+#: wpc-linked-variation.php:1328
 msgid "Linked Variations"
 msgstr ""
 
 #: wpc-linked-variation.php:574
-#: wpc-linked-variation.php:1325
+#: wpc-linked-variation.php:1329
 msgid "Premium Version"
 msgstr ""
 
@@ -418,38 +418,38 @@ msgstr ""
 msgid "+%d More"
 msgstr ""
 
-#: wpc-linked-variation.php:1341
+#: wpc-linked-variation.php:1345
 msgid "Community support"
 msgstr ""
 
-#: wpc-linked-variation.php:1375
+#: wpc-linked-variation.php:1379
 msgid "Before container"
 msgstr ""
 
-#: wpc-linked-variation.php:1376
+#: wpc-linked-variation.php:1380
 msgid "After container"
 msgstr ""
 
-#: wpc-linked-variation.php:1377
+#: wpc-linked-variation.php:1381
 msgid "Before attributes"
 msgstr ""
 
-#: wpc-linked-variation.php:1378
+#: wpc-linked-variation.php:1382
 msgid "After attributes"
 msgstr ""
 
-#: wpc-linked-variation.php:1379
+#: wpc-linked-variation.php:1383
 msgid "Before attribute"
 msgstr ""
 
-#: wpc-linked-variation.php:1380
+#: wpc-linked-variation.php:1384
 msgid "After attribute"
 msgstr ""
 
-#: wpc-linked-variation.php:1381
+#: wpc-linked-variation.php:1385
 msgid "Before attribute label"
 msgstr ""
 
-#: wpc-linked-variation.php:1382
+#: wpc-linked-variation.php:1386
 msgid "After attribute label"
 msgstr ""

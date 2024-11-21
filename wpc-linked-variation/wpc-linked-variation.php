@@ -3,7 +3,7 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.2.7
+Version: 4.2.8
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
@@ -19,7 +19,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.2.7' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.2.8' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -38,9 +38,6 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 	add_action( 'plugins_loaded', 'wpclv_init', 11 );
 
 	function wpclv_init() {
-		// load text-domain
-		load_plugin_textdomain( 'wpc-linked-variation', false, basename( __DIR__ ) . '/languages/' );
-
 		if ( ! function_exists( 'WC' ) || ! version_compare( WC()->version, '3.0', '>=' ) ) {
 			add_action( 'admin_notices', 'wpclv_notice_wc' );
 
@@ -152,6 +149,9 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 				}
 
 				function init() {
+					// load text-domain
+					load_plugin_textdomain( 'wpc-linked-variation', false, basename( WPCLV_DIR ) . '/languages/' );
+
 					// shortcode
 					add_shortcode( 'wpclv', [ $this, 'shortcode' ] );
 
@@ -196,7 +196,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 					if ( ! $attrs['id'] ) {
 						global $product;
 
-						if ( $product ) {
+						if ( $product && is_a( $product, 'WC_Product' ) ) {
 							$attrs['id'] = $product->get_id();
 						}
 					}
@@ -1237,6 +1237,10 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 				}
 
 				public static function get_linked_data( $product ) {
+					if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+						return false;
+					}
+
 					$product_id  = $product->get_id();
 					$linked_data = false;
 					$links       = get_posts( [
