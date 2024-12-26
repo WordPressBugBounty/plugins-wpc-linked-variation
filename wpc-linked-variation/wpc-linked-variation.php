@@ -3,7 +3,7 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.2.8
+Version: 4.3.0
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
@@ -12,14 +12,14 @@ Requires Plugins: woocommerce
 Requires at least: 4.0
 Tested up to: 6.7
 WC requires at least: 3.0
-WC tested up to: 9.4
+WC tested up to: 9.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.2.8' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.0' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -73,26 +73,26 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 					add_filter( 'manage_edit-wpclv_columns', [ $this, 'custom_column' ] );
 					add_action( 'manage_wpclv_posts_custom_column', [ $this, 'custom_column_value' ], 10, 2 );
 
-					add_action( 'wp_enqueue_scripts', [ $this, 'wp_enqueue_scripts' ] );
+					add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 					add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ] );
 					add_action( 'admin_init', [ $this, 'register_settings' ] );
 					add_action( 'admin_menu', [ $this, 'admin_menu' ] );
 
 					switch ( self::get_setting( 'position', 'above' ) ) {
 						case 'above':
-							add_action( 'woocommerce_single_product_summary', [ $this, 'render' ], 25 );
+							add_action( 'woocommerce_single_product_summary', [ $this, 'render_single' ], 25 );
 							break;
 						case 'below':
-							add_action( 'woocommerce_single_product_summary', [ $this, 'render' ], 35 );
+							add_action( 'woocommerce_single_product_summary', [ $this, 'render_single' ], 35 );
 							break;
 						case 'below_title':
-							add_action( 'woocommerce_single_product_summary', [ $this, 'render' ], 6 );
+							add_action( 'woocommerce_single_product_summary', [ $this, 'render_single' ], 6 );
 							break;
 						case 'below_price':
-							add_action( 'woocommerce_single_product_summary', [ $this, 'render' ], 11 );
+							add_action( 'woocommerce_single_product_summary', [ $this, 'render_single' ], 11 );
 							break;
 						case 'below_excerpt':
-							add_action( 'woocommerce_single_product_summary', [ $this, 'render' ], 21 );
+							add_action( 'woocommerce_single_product_summary', [ $this, 'render_single' ], 21 );
 							break;
 					}
 
@@ -117,6 +117,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
 					// ajax
 					add_action( 'wp_ajax_wpclv_search_term', [ $this, 'ajax_search_term' ] );
+					add_action( 'wc_ajax_wpclv_load_content', [ $this, 'ajax_load_content' ] );
 
 					// WPC Smart Messages
 					add_filter( 'wpcsm_locations', [ $this, 'wpcsm_locations' ] );
@@ -203,7 +204,14 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
 					if ( $attrs['id'] ) {
 						ob_start();
-						self::render( $attrs['id'], absint( $attrs['limit'] ), $attrs['hide'] );
+
+						if ( self::enable_ajax( 'shortcode' ) ) {
+							// render wrapper only
+							echo '<div class="' . esc_attr( apply_filters( 'wpclv_wrap_class', 'wpclv-attributes wpclv-attributes-shortcode wpclv-attributes-' . $attrs['id'], 'shortcode' ) ) . '" data-id="' . esc_attr( $attrs['id'] ) . '"></div>';
+						} else {
+							self::render_content( $attrs['id'], absint( $attrs['limit'] ), $attrs['hide'], 'shortcode' );
+						}
+
 						$output = ob_get_clean();
 					}
 
@@ -267,7 +275,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 										$taxonomies = get_object_taxonomies( 'product', 'objects' ); //$taxonomies = get_taxonomies( [ 'object_type' => [ 'product' ] ], 'objects' );
 
 										foreach ( $taxonomies as $taxonomy ) {
-											echo '<option value="' . $taxonomy->name . '" ' . ( $link_source === $taxonomy->name ? 'selected' : '' ) . ' disabled>' . $taxonomy->label . '</option>';
+											echo '<option value="' . esc_attr( $taxonomy->name ) . '" ' . ( $link_source === $taxonomy->name ? 'selected' : '' ) . ' disabled>' . esc_html( $taxonomy->label ) . '</option>';
 										}
 										?>
                                     </select> </label>
@@ -493,7 +501,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 					}
 				}
 
-				function wp_enqueue_scripts() {
+				function enqueue_scripts() {
 					if ( self::get_setting( 'tooltip_library', 'hint' ) === 'hint' ) {
 						wp_enqueue_style( 'hint', WPCLV_URI . 'assets/libs/hint/hint.css' );
 					}
@@ -506,7 +514,11 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 					wp_enqueue_style( 'wpclv-frontend', WPCLV_URI . 'assets/css/frontend.css', [], WPCLV_VERSION );
 					wp_enqueue_script( 'wpclv-frontend', WPCLV_URI . 'assets/js/frontend.js', [ 'jquery' ], WPCLV_VERSION, true );
 					wp_localize_script( 'wpclv-frontend', 'wpclv_vars', [
-							'tooltip_library' => self::get_setting( 'tooltip_library', 'hint' )
+							'wc_ajax_url'     => WC_AJAX::get_endpoint( '%%endpoint%%' ),
+							'nonce'           => wp_create_nonce( 'wpclv-security' ),
+							'ajax_single'     => self::enable_ajax( 'single' ),
+							'ajax_shortcode'  => self::enable_ajax( 'shortcode' ),
+							'tooltip_library' => self::get_setting( 'tooltip_library', 'hint' ),
 						]
 					);
 				}
@@ -923,13 +935,26 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 					}
 				}
 
+				public static function ajax_load_content() {
+					if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['nonce'] ), 'wpclv-security' ) ) {
+						die( 'Permissions check failed!' );
+					}
+
+					if ( ! isset( $_POST['id'] ) ) {
+						return;
+					}
+
+					self::render_content( sanitize_text_field( $_POST['id'] ), 0, '', 'ajax' );
+					wp_die();
+				}
+
 				public static function render_archive( $product_id = null ) {
 					$archive_limit = self::get_setting( 'archive_limit', '10' );
 
-					self::render( $product_id, absint( $archive_limit ) );
+					self::render_content( $product_id, absint( $archive_limit ), '', 'archive' );
 				}
 
-				public static function render( $product_id = null, $limit = 0, $hide = '' ) {
+				public static function render_single( $product_id = null, $limit = 0, $hide = '' ) {
 					if ( ! $product_id ) {
 						global $product;
 						$_product   = $product;
@@ -942,161 +967,93 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 						return;
 					}
 
-					$link_data = self::get_linked_data( $_product );
+					if ( self::enable_ajax( 'single' ) ) {
+						// render wrapper only
+						echo '<div class="' . esc_attr( apply_filters( 'wpclv_wrap_class', 'wpclv-attributes wpclv-attributes-single wpclv-attributes-' . $product_id, 'single' ) ) . '" data-id="' . esc_attr( $product_id ) . '"></div>';
+					} else {
+						self::render_content( $product_id, $limit, $hide, 'single' );
+					}
+				}
 
-					if ( empty( $link_data ) ) {
+				public static function render_content( $product_id = null, $limit = 0, $hide = '', $context = 'default' ) {
+					if ( ! $product_id ) {
+						global $product;
+						$_product   = $product;
+						$product_id = $_product->get_id();
+					} else {
+						$_product = wc_get_product( $product_id );
+					}
+
+					if ( ! $product_id || ! is_a( $_product, 'WC_Product' ) ) {
 						return;
 					}
 
-					$link_attributes = $link_data['attributes'] ?? [];
-					$link_images     = $link_data['images'] ?? [];
-					$link_swatches   = $link_data['swatches'] ?? [];
-					$link_dropdown   = $link_data['dropdown'] ?? [];
-					$hide_attributes = ! empty( $hide ) ? explode( ',', $hide ) : [];
+					if ( ! self::enable_cache( 'content' ) || ( false === ( $link_content = get_transient( 'wpclv_linked_content_' . $context . '_' . $product_id ) ) ) ) {
+						ob_start();
 
-					// get product ids
-					$link_products = [];
-					$link_source   = $link_data['source'] ?? 'products';
-					$link_limit    = $link_data['limit'] ?? 100;
-					$link_orderby  = $link_data['orderby'] ?? 'default';
-					$link_order    = $link_data['order'] ?? 'default';
+						$link_data = self::get_linked_data( $_product );
 
-					if ( ( $link_source === 'products' ) && ! empty( $link_data['products'] ) ) {
-						$link_products = explode( ',', $link_data['products'] );
-					}
+						if ( empty( $link_data ) ) {
+							return;
+						}
 
-					if ( ( $link_source === 'categories' ) && ! empty( $link_data['categories'] ) ) {
-						$categories = array_map( 'trim', explode( ',', $link_data['categories'] ) );
+						// exclude current product
+						$link_products = self::get_linked_products( $link_data );
+						$link_products = apply_filters( 'wpclv_linked_products', array_diff( $link_products, [ $product_id ] ), $product_id );
 
-						if ( ! empty( $categories ) ) {
-							$args = [
-								'post_type'           => 'product',
-								'post_status'         => 'publish',
-								'ignore_sticky_posts' => 1,
-								'posts_per_page'      => $link_limit,
-								'orderby'             => $link_orderby,
-								'order'               => $link_order,
-								'tax_query'           => [
-									[
-										'taxonomy' => 'product_cat',
-										'field'    => 'slug',
-										'terms'    => $categories,
-										'operator' => 'IN',
-									]
-								]
-							];
+						if ( empty( $link_products ) ) {
+							return;
+						}
 
-							$products = new WP_Query( apply_filters( 'wpclv_query_args', $args, $product_id ) );
+						$link_attributes     = $link_data['attributes'] ?? [];
+						$link_images         = $link_data['images'] ?? [];
+						$link_swatches       = $link_data['swatches'] ?? [];
+						$link_dropdown       = $link_data['dropdown'] ?? [];
+						$hide_attributes     = ! empty( $hide ) ? explode( ',', $hide ) : [];
+						$assigned_attributes = array_keys( $_product->get_attributes() );
+						$product_attributes  = [];
 
-							if ( $products->have_posts() ) {
-								while ( $products->have_posts() ) {
-									$products->the_post();
-									$link_products[] = get_the_ID();
-								}
+						foreach ( $assigned_attributes as $assigned_attribute ) {
+							$product_attributes[ $assigned_attribute ] = wc_get_product_terms( $product_id, $assigned_attribute, [ 'fields' => 'ids' ] );
+						}
+
+						if ( ! empty( $link_attributes ) ) {
+							do_action( 'wpclv_wrap_above', $link_attributes );
+
+							if ( $context !== 'ajax' ) {
+								echo '<div class="' . esc_attr( apply_filters( 'wpclv_wrap_class', 'wpclv-attributes wpclv-attributes-' . $context . ' wpclv-attributes-' . $product_id, $context ) ) . '" data-id="' . esc_attr( $product_id ) . '">';
 							}
 
-							wp_reset_postdata();
-						}
-					}
-
-					if ( ( $link_source === 'tags' ) && ! empty( $link_data['tags'] ) ) {
-						$tags = array_map( 'trim', explode( ',', $link_data['tags'] ) );
-
-						if ( ! empty( $tags ) ) {
-							$args = [
-								'post_type'           => 'product',
-								'post_status'         => 'publish',
-								'ignore_sticky_posts' => 1,
-								'posts_per_page'      => $link_limit,
-								'orderby'             => $link_orderby,
-								'order'               => $link_order,
-								'tax_query'           => [
-									[
-										'taxonomy' => 'product_tag',
-										'field'    => 'slug',
-										'terms'    => $tags,
-										'operator' => 'IN',
-									]
-								]
-							];
-
-							$products = new WP_Query( apply_filters( 'wpclv_query_args', $args, $product_id ) );
-
-							if ( $products->have_posts() ) {
-								while ( $products->have_posts() ) {
-									$products->the_post();
-									$link_products[] = get_the_ID();
-								}
-							}
-
-							wp_reset_postdata();
-						}
-					}
-
-					// exclude hidden or unpurchasable
-					if ( ( self::get_setting( 'exclude_hidden', 'no' ) === 'yes' ) || ( self::get_setting( 'exclude_unpurchasable', 'no' ) === 'yes' ) ) {
-						foreach ( $link_products as $key => $link_product_id ) {
-							$link_product = wc_get_product( $link_product_id );
-
-							if ( ! $link_product || ( ! $link_product->is_visible() && ( self::get_setting( 'exclude_hidden', 'no' ) === 'yes' ) ) || ( ( ! $link_product->is_purchasable() || ! $link_product->is_in_stock() ) && ( self::get_setting( 'exclude_unpurchasable', 'no' ) === 'yes' ) ) ) {
-								unset( $link_products[ $key ] );
-							}
-						}
-					}
-
-					// exclude current product
-					$link_products = apply_filters( 'wpclv_linked_products', array_diff( $link_products, [ $product_id ] ), $product_id );
-
-					if ( empty( $link_products ) ) {
-						return;
-					}
-
-					$all_taxonomies     = [];
-					$product_attributes = [];
-
-					//$filter_assigned_attributes = array_filter( $_product->get_attributes(), 'wc_attributes_array_filter_visible' );
-					$assigned_attributes = array_keys( $_product->get_attributes() );
-
-					foreach ( $assigned_attributes as $assigned_attribute ) {
-						$product_attributes[ $assigned_attribute ] = wc_get_product_terms( $product_id, $assigned_attribute, [ 'fields' => 'ids' ] );
-					}
-
-					if ( ! empty( $link_attributes ) ) {
-						do_action( 'wpclv_wrap_above', $link_attributes );
-						?>
-                        <div class="wpclv-attributes">
-							<?php
 							do_action( 'wpclv_wrap_before', $link_attributes );
 
-							$link_attributes_ids = array_map( function ( $e ) {
-								return (int) filter_var( $e, FILTER_SANITIZE_NUMBER_INT );
-							}, $link_attributes );
+							$link_attributes_slugs = [];
 
 							foreach ( $link_attributes as $link_attribute ) {
 								$link_attribute_id = (int) filter_var( $link_attribute, FILTER_SANITIZE_NUMBER_INT );
 								$attribute         = wc_get_attribute( $link_attribute_id );
-								$use_images        = in_array( $link_attribute, $link_images );
-								$use_dropdown      = in_array( $link_attribute, $link_dropdown );
-								$use_swatches      = in_array( $link_attribute, $link_swatches ) && class_exists( 'WPCleverWpcvs' );
 
 								if ( ! $attribute || in_array( $attribute->slug, $hide_attributes ) ) {
 									continue;
 								}
 
-								array_push( $all_taxonomies, $attribute->slug );
+								$link_attributes_slugs[] = $attribute->slug;
 
 								$args          = apply_filters( 'wpclv_get_terms_args', [
 									'taxonomy'   => $attribute->slug,
 									'hide_empty' => false
 								] );
 								$terms         = get_terms( $args );
-								$current_terms = wc_get_product_terms( $product_id, $attribute->slug, [ 'fields' => 'ids' ] );
+								$current_terms = wc_get_product_terms( $product_id, $attribute->slug, [ 'fields' => 'slugs' ] );
 
 								if ( empty( $terms ) || empty( $current_terms ) ) {
 									continue;
 								}
+
+								$use_images   = in_array( $link_attribute, $link_images );
+								$use_dropdown = in_array( $link_attribute, $link_dropdown );
+								$use_swatches = in_array( $link_attribute, $link_swatches ) && class_exists( 'WPCleverWpcvs' );
 								?>
-                                <div class="wpclv-attribute">
+                                <div class="<?php echo esc_attr( 'wpclv-attribute wpclv-attribute-' . $attribute->slug ); ?>">
 									<?php do_action( 'wpclv_attribute_before', $attribute ); ?>
                                     <div class="wpclv-attribute-label">
 										<?php
@@ -1116,14 +1073,15 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 										}
 
 										foreach ( $terms as $term ) {
-											if ( in_array( $term->term_id, $current_terms ) ) {
+											if ( in_array( $term->slug, $current_terms ) ) {
+												// current product
 												if ( ! $limit || $count < $limit ) {
 													if ( $use_images ) {
 														self::term( 'image', $attribute, $term, true, $product_id );
 													} elseif ( $use_swatches ) {
-														self::term( 'swatches', $attribute, $term, true );
+														self::term( 'swatches', $attribute, $term, true, $product_id );
 													} elseif ( $use_dropdown ) {
-														self::term( 'dropdown', $attribute, $term, true );
+														self::term( 'dropdown', $attribute, $term, true, $product_id );
 													} else {
 														self::term( 'button', $attribute, $term, true, $product_id );
 													}
@@ -1131,35 +1089,28 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
 												$count ++;
 											} else {
-												$tax_query = [ 'relation' => 'AND' ];
-
+												$tax_query     = [];
 												$tax_query_ori = [
 													'taxonomy' => $term->taxonomy,
-													'field'    => 'id',
-													'terms'    => $term->term_id
+													'term'     => $term->slug
 												];
 
 												foreach ( $product_attributes as $product_attribute_key => $product_attribute ) {
-													$product_attribute_id = wc_attribute_taxonomy_id_by_name( $product_attribute_key );
-
-													if ( ! in_array( $product_attribute_id, $link_attributes_ids ) ) {
+													if ( ! in_array( $product_attribute_key, $link_attributes_slugs ) ) {
 														continue;
 													}
 
 													if ( $term->taxonomy != $product_attribute_key ) {
 														$tax_query[] = [
 															'taxonomy' => $product_attribute_key,
-															'field'    => 'id',
-															'terms'    => $product_attribute
+															'term'     => $product_attribute
 														];
 													}
 												}
 
 												array_push( $tax_query, $tax_query_ori );
 
-												$linked_id = self::get_linked_product_id( $tax_query, $link_products, $linked_products );
-
-												if ( $linked_id ) {
+												if ( $linked_id = self::get_linked_product_id( $tax_query, $link_products, $linked_products ) ) {
 													$linked_products[] = $linked_id;
 
 													if ( ! $limit || $count < $limit ) {
@@ -1176,9 +1127,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
 													$count ++;
 												} else {
-													$linked_id = apply_filters( 'wpclv_get_imperfect_product', true ) ? self::get_linked_product_id( [ $tax_query_ori ], $link_products, $linked_products ) : 0;
-
-													if ( $linked_id ) {
+													if ( $linked_id = apply_filters( 'wpclv_get_imperfect_product', true ) ? self::get_linked_product_id( [ $tax_query_ori ], $link_products, $linked_products ) : 0 ) {
 														$linked_products[] = $linked_id;
 
 														if ( ! $limit || $count < $limit ) {
@@ -1229,11 +1178,55 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 							<?php }
 
 							do_action( 'wpclv_wrap_after', $link_attributes );
-							?>
-                        </div>
-						<?php
-						do_action( 'wpclv_wrap_below', $link_attributes );
+
+							if ( $context !== 'ajax' ) {
+								echo '</div><!-- /wpclv-attributes -->';
+							}
+
+							do_action( 'wpclv_wrap_below', $link_attributes );
+						}
+
+						$link_content = ob_get_clean();
+
+						if ( self::enable_cache( 'content' ) ) {
+							set_transient( 'wpclv_linked_content_' . $product_id, $link_content, 24 * HOUR_IN_SECONDS );
+						}
 					}
+
+					echo $link_content;
+				}
+
+				public static function get_linked_products( $link_data ) {
+					$link_id = $link_data['id'] ?? 0;
+
+					if ( ! self::enable_cache( 'products' ) || ( false === ( $link_products = get_transient( 'wpclv_linked_products_' . $link_id ) ) ) ) {
+						$link_products = [];
+						$link_source   = $link_data['source'] ?? 'products';
+						$link_limit    = $link_data['limit'] ?? 100;
+						$link_orderby  = $link_data['orderby'] ?? 'default';
+						$link_order    = $link_data['order'] ?? 'default';
+
+						if ( ( $link_source === 'products' ) && ! empty( $link_data['products'] ) ) {
+							$link_products = explode( ',', $link_data['products'] );
+						}
+
+						// exclude hidden or unpurchasable
+						if ( ( self::get_setting( 'exclude_hidden', 'no' ) === 'yes' ) || ( self::get_setting( 'exclude_unpurchasable', 'no' ) === 'yes' ) ) {
+							foreach ( $link_products as $key => $link_product_id ) {
+								$link_product = wc_get_product( $link_product_id );
+
+								if ( ! $link_product || ( ! $link_product->is_visible() && ( self::get_setting( 'exclude_hidden', 'no' ) === 'yes' ) ) || ( ( ! $link_product->is_purchasable() || ! $link_product->is_in_stock() ) && ( self::get_setting( 'exclude_unpurchasable', 'no' ) === 'yes' ) ) ) {
+									unset( $link_products[ $key ] );
+								}
+							}
+						}
+
+						if ( self::enable_cache( 'products' ) ) {
+							set_transient( 'wpclv_linked_products_' . $link_id, $link_products, 24 * HOUR_IN_SECONDS );
+						}
+					}
+
+					return apply_filters( 'wpclv_get_linked_products', $link_products, $link_data );
 				}
 
 				public static function get_linked_data( $product ) {
@@ -1241,75 +1234,121 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 						return false;
 					}
 
-					$product_id  = $product->get_id();
-					$linked_data = false;
-					$links       = get_posts( [
-						'post_type'      => 'wpclv',
-						'post_status'    => 'publish',
-						'posts_per_page' => - 1, // get all linked
-						'fields'         => 'ids'
-					] );
+					$product_id = $product->get_id();
 
-					if ( ! empty( $links ) ) {
-						foreach ( $links as $link_id ) {
-							$link = get_post_meta( $link_id, 'wpclv_link', true );
+					if ( ! self::enable_cache( 'data' ) || ( false === ( $linked_data = get_transient( 'wpclv_linked_data_' . $product_id ) ) ) ) {
+						$linked_data = [];
+						$links       = get_posts( [
+							'post_type'              => 'wpclv',
+							'post_status'            => 'publish',
+							'posts_per_page'         => 500, // get all linked
+							'no_found_rows'          => true,
+							'update_post_term_cache' => false,
+							'update_post_meta_cache' => false,
+							'fields'                 => 'ids'
+						] );
 
-							if ( ! empty( $link ) ) {
-								$link_source = $link['source'] ?? 'products';
+						if ( ! empty( $links ) ) {
+							foreach ( $links as $link_id ) {
+								$link = get_post_meta( $link_id, 'wpclv_link', true );
 
-								if ( ( $link_source === 'products' ) && ! empty( $link['products'] ) ) {
-									$product_ids = explode( ',', $link['products'] );
+								if ( ! empty( $link ) ) {
+									$link_source = $link['source'] ?? 'products';
 
-									if ( in_array( $product_id, $product_ids ) ) {
-										$linked_data = $link;
-										break;
+									if ( ( $link_source === 'products' ) && ! empty( $link['products'] ) ) {
+										$product_ids = explode( ',', $link['products'] );
+
+										if ( in_array( $product_id, $product_ids ) ) {
+											$linked_data       = $link;
+											$linked_data['id'] = $link_id;
+											break;
+										}
 									}
-								}
 
-								if ( ( $link_source === 'categories' ) && ! empty( $link['categories'] ) ) {
-									$categories = array_map( 'trim', explode( ',', $link['categories'] ) );
+									if ( ( $link_source === 'categories' ) && ! empty( $link['categories'] ) ) {
+										$categories = array_map( 'trim', explode( ',', $link['categories'] ) );
 
-									if ( has_term( $categories, 'product_cat', $product_id ) ) {
-										$linked_data = $link;
-										break;
+										if ( has_term( $categories, 'product_cat', $product_id ) ) {
+											$linked_data       = $link;
+											$linked_data['id'] = $link_id;
+											break;
+										}
 									}
-								}
 
-								if ( ( $link_source === 'tags' ) && ! empty( $link['tags'] ) ) {
-									$tags = array_map( 'trim', explode( ',', $link['tags'] ) );
+									if ( ( $link_source === 'tags' ) && ! empty( $link['tags'] ) ) {
+										$tags = array_map( 'trim', explode( ',', $link['tags'] ) );
 
-									if ( has_term( $tags, 'product_tag', $product_id ) ) {
-										$linked_data = $link;
-										break;
+										if ( has_term( $tags, 'product_tag', $product_id ) ) {
+											$linked_data       = $link;
+											$linked_data['id'] = $link_id;
+											break;
+										}
+									}
+
+									if ( ! in_array( $link_source, [ 'products', 'categories', 'tags' ] ) ) {
+										$terms_all = $link['terms_all'] ?? '';
+
+										if ( ! empty( $terms_all ) ) {
+											if ( has_term( '', $link_source, $product_id ) ) {
+												$linked_data       = $link;
+												$linked_data['id'] = $link_id;
+												break;
+											}
+										} elseif ( ! empty( $link['terms'] ) ) {
+											$terms = array_map( 'trim', explode( ',', $link['terms'] ) );
+
+											if ( has_term( $terms, $link_source, $product_id ) ) {
+												$linked_data       = $link;
+												$linked_data['id'] = $link_id;
+												break;
+											}
+										}
 									}
 								}
 							}
+						}
+
+						if ( self::enable_cache( 'data' ) ) {
+							set_transient( 'wpclv_linked_data_' . $product_id, $linked_data, 24 * HOUR_IN_SECONDS );
 						}
 					}
 
 					return apply_filters( 'wpclv_get_linked_data', $linked_data, $product );
 				}
 
+				public static function enable_cache( $context = 'default' ) {
+					return apply_filters( 'wpclv_enable_cache', false, $context );
+				}
+
+				public static function enable_ajax( $context = 'default' ) {
+					return apply_filters( 'wpclv_enable_ajax', false, $context );
+				}
+
 				// return post id
 				public static function get_linked_product_id( $tax_query, $link_products = [], $linked_products = [] ) {
-					if ( apply_filters( 'wpclv_exclude_linked_products', false ) ) {
-						$post_in = array_diff( $link_products, $linked_products );
+					if ( apply_filters( 'wpclv_exclude_linked_products', true ) ) {
+						// don't get a product twice
+						$get_products = array_diff( $link_products, $linked_products );
 					} else {
-						$post_in = $link_products;
+						$get_products = $link_products;
 					}
 
-					if ( ! empty( $post_in ) ) {
-						$args = [
-							'post_type'      => 'product',
-							'posts_per_page' => 1,
-							'order'          => 'ASC',
-							'fields'         => 'ids',
-							'post__in'       => $post_in,
-							'tax_query'      => $tax_query
-						];
+					if ( empty( $get_products ) || empty( $tax_query ) ) {
+						return false;
+					}
 
-						if ( $filter_product = get_posts( apply_filters( 'wpclv_get_linked_product_id_args', $args, $link_products, $linked_products ) ) ) {
-							return $filter_product[0];
+					foreach ( $get_products as $product_id ) {
+						$valid = true;
+
+						foreach ( $tax_query as $tax ) {
+							if ( ! has_term( $tax['term'], $tax['taxonomy'], $product_id ) ) {
+								$valid = false;
+								break;
+							}
+						}
+
+						if ( $valid ) {
+							return $product_id;
 						}
 					}
 
