@@ -4,8 +4,8 @@ Donate link: https://wpclever.net
 Tags: woocommerce, wpc, linked variations, variation
 Requires at least: 4.0
 Tested up to: 6.7
-Version: 4.3.0
-Stable tag: 4.3.0
+Version: 4.3.1
+Stable tag: 4.3.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,6 +84,9 @@ Good luck and enjoy our plugin.
 4. Go to WP-admin > WPClever > Linked Variation to add linked variations
 
 == Changelog ==
+
+= 4.3.1 =
+* Updated: Optimized the code
 
 = 4.3.0 =
 * Updated: Optimized the code

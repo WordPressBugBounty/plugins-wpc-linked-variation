@@ -3,7 +3,7 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.3.0
+Version: 4.3.1
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
@@ -19,7 +19,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.0' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.1' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -949,9 +949,25 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 				}
 
 				public static function render_archive( $product_id = null ) {
-					$archive_limit = self::get_setting( 'archive_limit', '10' );
+					if ( ! $product_id ) {
+						global $product;
+						$_product   = $product;
+						$product_id = $_product->get_id();
+					} else {
+						$_product = wc_get_product( $product_id );
+					}
 
-					self::render_content( $product_id, absint( $archive_limit ), '', 'archive' );
+					if ( ! $_product || ! is_a( $_product, 'WC_Product' ) ) {
+						return;
+					}
+
+					if ( self::enable_ajax( 'archive' ) ) {
+						// render wrapper only
+						echo '<div class="' . esc_attr( apply_filters( 'wpclv_wrap_class', 'wpclv-attributes wpclv-attributes-archive wpclv-attributes-' . $product_id, 'archive' ) ) . '" data-id="' . esc_attr( $product_id ) . '"></div>';
+					} else {
+						$limit = absint( self::get_setting( 'archive_limit', '10' ) );
+						self::render_content( $product_id, $limit, '', 'archive' );
+					}
 				}
 
 				public static function render_single( $product_id = null, $limit = 0, $hide = '' ) {
@@ -989,8 +1005,6 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 					}
 
 					if ( ! self::enable_cache( 'content' ) || ( false === ( $link_content = get_transient( 'wpclv_linked_content_' . $context . '_' . $product_id ) ) ) ) {
-						ob_start();
-
 						$link_data = self::get_linked_data( $_product );
 
 						if ( empty( $link_data ) ) {
@@ -1016,6 +1030,8 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 						foreach ( $assigned_attributes as $assigned_attribute ) {
 							$product_attributes[ $assigned_attribute ] = wc_get_product_terms( $product_id, $assigned_attribute, [ 'fields' => 'ids' ] );
 						}
+
+						ob_start();
 
 						if ( ! empty( $link_attributes ) ) {
 							do_action( 'wpclv_wrap_above', $link_attributes );
@@ -1202,9 +1218,6 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 					if ( ! self::enable_cache( 'products' ) || ( false === ( $link_products = get_transient( 'wpclv_linked_products_' . $link_id ) ) ) ) {
 						$link_products = [];
 						$link_source   = $link_data['source'] ?? 'products';
-						$link_limit    = $link_data['limit'] ?? 100;
-						$link_orderby  = $link_data['orderby'] ?? 'default';
-						$link_order    = $link_data['order'] ?? 'default';
 
 						if ( ( $link_source === 'products' ) && ! empty( $link_data['products'] ) ) {
 							$link_products = explode( ',', $link_data['products'] );
