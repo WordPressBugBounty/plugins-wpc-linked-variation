@@ -3,7 +3,7 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.3.1
+Version: 4.3.2
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
@@ -12,14 +12,14 @@ Requires Plugins: woocommerce
 Requires at least: 4.0
 Tested up to: 6.7
 WC requires at least: 3.0
-WC tested up to: 9.5
+WC tested up to: 9.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.1' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.2' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -286,9 +286,12 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 								<?php esc_html_e( 'Products', 'wpc-linked-variation' ); ?>
                             </div>
                             <div class="wpclv_td wpclv_link_td">
-                                <input class="wpclv-products" type="hidden" name="wpclv_link[products]" value="<?php echo esc_attr( $link_products ); ?>"/>
+                                <input class="wpclv-products" type="hidden" name="wpclv_link[products]"
+                                       value="<?php echo esc_attr( $link_products ); ?>"/>
                                 <label>
-                                    <select class="wc-product-search wpclv-product-search" multiple="multiple" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'wpc-linked-variation' ); ?>" data-action="woocommerce_json_search_products">
+                                    <select class="wc-product-search wpclv-product-search" multiple="multiple"
+                                            data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'wpc-linked-variation' ); ?>"
+                                            data-action="woocommerce_json_search_products">
 										<?php
 										$_product_ids = explode( ',', $link_products );
 
@@ -308,16 +311,20 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 								<?php esc_html_e( 'Terms', 'wpc-linked-variation' ); ?>
                             </div>
                             <div class="wpclv_td wpclv_link_td" style="display: flex; align-items: center;">
-                                <span class="wpclv-source-terms-all"><label><input type="checkbox" name="wpclv_link[terms_all]" value="1" <?php echo( ! empty( $terms_all ) ? 'checked' : '' ); ?>/><?php esc_html_e( 'All (any)', 'wpc-linked-variation' ); ?></label> <u><?php esc_html_e( 'or', 'wpc-linked-variation' ); ?></u> </span>
+                                <span class="wpclv-source-terms-all"><label><input type="checkbox"
+                                                                                   name="wpclv_link[terms_all]"
+                                                                                   value="1" <?php echo( ! empty( $terms_all ) ? 'checked' : '' ); ?>/><?php esc_html_e( 'All (any)', 'wpc-linked-variation' ); ?></label> <u><?php esc_html_e( 'or', 'wpc-linked-variation' ); ?></u> </span>
                                 <span class="wpclv-source-terms-select" style="flex-grow: 1;">
-                                <input class="wpclv-terms-val" type="hidden" style="width: 100%" name="wpclv_link[terms]" value="<?php echo esc_attr( $link_terms ); ?>"/>
+                                <input class="wpclv-terms-val" type="hidden" style="width: 100%"
+                                       name="wpclv_link[terms]" value="<?php echo esc_attr( $link_terms ); ?>"/>
 								<?php
 								if ( ! is_array( $link_terms ) ) {
 									$link_terms = array_map( 'trim', explode( ',', $link_terms ) );
 								}
 								?>
                                 <label>
-<select class="wpclv-terms-select" multiple="multiple" data-<?php echo esc_attr( $link_source ); ?>="<?php echo esc_attr( implode( ',', $link_terms ) ); ?>">
+<select class="wpclv-terms-select" multiple="multiple"
+        data-<?php echo esc_attr( $link_source ); ?>="<?php echo esc_attr( implode( ',', $link_terms ) ); ?>">
     <?php
     if ( ! empty( $link_terms ) ) {
 	    foreach ( $link_terms as $t ) {
@@ -338,7 +345,8 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                             </div>
                             <div class="wpclv_td wpclv_link_td">
                                 <label>
-                                    <input type="number" name="wpclv_link[limit]" min="-1" step="1" value="<?php echo esc_attr( $link_limit ); ?>"/>
+                                    <input type="number" name="wpclv_link[limit]" min="-1" step="1"
+                                           value="<?php echo esc_attr( $link_limit ); ?>"/>
                                 </label>
                             </div>
                         </div>
@@ -405,7 +413,8 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                             <div class="wpclv_td" style="text-align: end;">
 								<?php add_thickbox(); ?>
                                 To use swatches, you need to install and activate
-                                <a href="<?php echo esc_url( admin_url( 'plugin-install.php?tab=plugin-information&plugin=wpc-variation-swatches&TB_iframe=true&width=800&height=550' ) ); ?>" class="thickbox" title="WPC Variation Swatches">WPC Variation Swatches</a>.
+                                <a href="<?php echo esc_url( admin_url( 'plugin-install.php?tab=plugin-information&plugin=wpc-variation-swatches&TB_iframe=true&width=800&height=550' ) ); ?>"
+                                   class="thickbox" title="WPC Variation Swatches">WPC Variation Swatches</a>.
                             </div>
                         </div>
                     </div>
@@ -561,9 +570,12 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                             <p>
 								<?php printf( /* translators: stars */ esc_html__( 'Thank you for using our plugin! If you are satisfied, please reward it a full five-star %s rating.', 'wpc-linked-variation' ), '<span style="color:#ffb900">&#9733;&#9733;&#9733;&#9733;&#9733;</span>' ); ?>
                                 <br/>
-                                <a href="<?php echo esc_url( WPCLV_REVIEWS ); ?>" target="_blank"><?php esc_html_e( 'Reviews', 'wpc-linked-variation' ); ?></a> |
-                                <a href="<?php echo esc_url( WPCLV_CHANGELOG ); ?>" target="_blank"><?php esc_html_e( 'Changelog', 'wpc-linked-variation' ); ?></a> |
-                                <a href="<?php echo esc_url( WPCLV_DISCUSSION ); ?>" target="_blank"><?php esc_html_e( 'Discussion', 'wpc-linked-variation' ); ?></a>
+                                <a href="<?php echo esc_url( WPCLV_REVIEWS ); ?>"
+                                   target="_blank"><?php esc_html_e( 'Reviews', 'wpc-linked-variation' ); ?></a> |
+                                <a href="<?php echo esc_url( WPCLV_CHANGELOG ); ?>"
+                                   target="_blank"><?php esc_html_e( 'Changelog', 'wpc-linked-variation' ); ?></a> |
+                                <a href="<?php echo esc_url( WPCLV_DISCUSSION ); ?>"
+                                   target="_blank"><?php esc_html_e( 'Discussion', 'wpc-linked-variation' ); ?></a>
                             </p>
                         </div>
 						<?php if ( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] ) { ?>
@@ -573,19 +585,25 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 						<?php } ?>
                         <div class="wpclever_settings_page_nav">
                             <h2 class="nav-tab-wrapper">
-                                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wpclever-wpclv&tab=settings' ) ); ?>" class="<?php echo $active_tab === 'settings' ? 'nav-tab nav-tab-active' : 'nav-tab'; ?>">
+                                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wpclever-wpclv&tab=settings' ) ); ?>"
+                                   class="<?php echo $active_tab === 'settings' ? 'nav-tab nav-tab-active' : 'nav-tab'; ?>">
 									<?php esc_html_e( 'Settings', 'wpc-linked-variation' ); ?>
                                 </a>
-                                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wpclever-wpclv&tab=localization' ) ); ?>" class="<?php echo $active_tab === 'localization' ? 'nav-tab nav-tab-active' : 'nav-tab'; ?>">
+                                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wpclever-wpclv&tab=localization' ) ); ?>"
+                                   class="<?php echo $active_tab === 'localization' ? 'nav-tab nav-tab-active' : 'nav-tab'; ?>">
 									<?php esc_html_e( 'Localization', 'wpc-linked-variation' ); ?>
                                 </a>
-                                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=wpclv' ) ); ?>" class="nav-tab">
+                                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=wpclv' ) ); ?>"
+                                   class="nav-tab">
 									<?php esc_html_e( 'Linked Variations', 'wpc-linked-variation' ); ?>
                                 </a>
-                                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wpclever-wpclv&tab=premium' ) ); ?>" class="<?php echo $active_tab === 'premium' ? 'nav-tab nav-tab-active' : 'nav-tab'; ?>" style="color: #c9356e">
+                                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wpclever-wpclv&tab=premium' ) ); ?>"
+                                   class="<?php echo $active_tab === 'premium' ? 'nav-tab nav-tab-active' : 'nav-tab'; ?>"
+                                   style="color: #c9356e">
 									<?php esc_html_e( 'Premium Version', 'wpc-linked-variation' ); ?>
                                 </a>
-                                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wpclever-kit' ) ); ?>" class="nav-tab">
+                                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wpclever-kit' ) ); ?>"
+                                   class="nav-tab">
 									<?php esc_html_e( 'Essential Kit', 'wpc-linked-variation' ); ?>
                                 </a>
                             </h2>
@@ -634,7 +652,9 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                                 <p>
 													<?php esc_html_e( 'Limit', 'wpc-linked-variation' ); ?>
                                                     <label>
-                                                        <input name="wpclv_settings[archive_limit]" type="number" min="0" max="500" value="<?php echo esc_attr( $archive_limit ); ?>"/>
+                                                        <input name="wpclv_settings[archive_limit]" type="number"
+                                                               min="0" max="500"
+                                                               value="<?php echo esc_attr( $archive_limit ); ?>"/>
                                                     </label>
                                                 </p>
                                             </td>
@@ -653,7 +673,10 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                                         <option value="tippy" <?php selected( $tooltip_library, 'tippy' ); ?>><?php esc_html_e( 'Tippy.js', 'wpc-linked-variation' ); ?></option>
                                                         <option value="none" <?php selected( $tooltip_library, 'none' ); ?>><?php esc_html_e( 'None (Disable)', 'wpc-linked-variation' ); ?></option>
                                                     </select> </label>
-                                                <span class="description">Read more about <a href="https://kushagra.dev/lab/hint/" target="_blank">Hint.css</a> and <a href="https://atomiks.github.io/tippyjs/v6/getting-started/" target="_blank">Tippy.js</a>. Use Tippy.js if you want to show the attribute/product's name, description, image on the tooltip.</span>
+                                                <span class="description">Read more about <a
+                                                            href="https://kushagra.dev/lab/hint/" target="_blank">Hint.css</a> and <a
+                                                            href="https://atomiks.github.io/tippyjs/v6/getting-started/"
+                                                            target="_blank">Tippy.js</a>. Use Tippy.js if you want to show the attribute/product's name, description, image on the tooltip.</span>
                                             </td>
                                         </tr>
                                         <tr>
@@ -712,7 +735,9 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                                         <option value="yes" <?php selected( $link, 'yes' ); ?>><?php esc_html_e( 'Open in the same tab', 'wpc-linked-variation' ); ?></option>
                                                         <option value="yes_blank" <?php selected( $link, 'yes_blank' ); ?>><?php esc_html_e( 'Open in the new tab', 'wpc-linked-variation' ); ?></option>
                                                         <option value="yes_popup" <?php selected( $link, 'yes_popup' ); ?>><?php esc_html_e( 'Open quick view popup', 'wpc-linked-variation' ); ?></option>
-                                                    </select> </label> <span class="description">If you choose "Open quick view popup", please install <a href="<?php echo esc_url( admin_url( 'plugin-install.php?tab=plugin-information&plugin=woo-smart-quick-view&TB_iframe=true&width=800&height=550' ) ); ?>" class="thickbox" title="WPC Smart Quick View">WPC Smart Quick View</a> to make it work.</span>
+                                                    </select> </label> <span class="description">If you choose "Open quick view popup", please install <a
+                                                            href="<?php echo esc_url( admin_url( 'plugin-install.php?tab=plugin-information&plugin=woo-smart-quick-view&TB_iframe=true&width=800&height=550' ) ); ?>"
+                                                            class="thickbox" title="WPC Smart Quick View">WPC Smart Quick View</a> to make it work.</span>
                                             </td>
                                         </tr>
                                         <tr>
@@ -744,8 +769,12 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                             <th><?php esc_html_e( 'More', 'wpc-linked-variation' ); ?></th>
                                             <td>
                                                 <label>
-                                                    <input type="text" class="regular-text" name="wpclv_localization[more]" value="<?php echo esc_attr( self::localization( 'more' ) ); ?>" placeholder="<?php /* translators: count */
-													esc_attr_e( '+%d More', 'wpc-linked-variation' ); ?>"/> </label>
+                                                    <input type="text" class="regular-text"
+                                                           name="wpclv_localization[more]"
+                                                           value="<?php echo esc_attr( self::localization( 'more' ) ); ?>"
+                                                           placeholder="<?php /* translators: count */
+													       esc_attr_e( '+%d More', 'wpc-linked-variation' ); ?>"/>
+                                                </label>
                                             </td>
                                         </tr>
                                         <tr class="submit">
@@ -759,7 +788,8 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                 <div class="wpclever_settings_page_content_text">
                                     <p>
                                         Get the Premium Version just $29!
-                                        <a href="https://wpclever.net/downloads/wpc-linked-variation?utm_source=pro&utm_medium=wpclv&utm_campaign=wporg" target="_blank">https://wpclever.net/downloads/wpc-linked-variation</a>
+                                        <a href="https://wpclever.net/downloads/wpc-linked-variation?utm_source=pro&utm_medium=wpclv&utm_campaign=wporg"
+                                           target="_blank">https://wpclever.net/downloads/wpc-linked-variation</a>
                                     </p>
                                     <p><strong>Extra features for Premium Version:</strong></p>
                                     <ul style="margin-bottom: 0">
@@ -775,13 +805,17 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                             </div>
                             <div class="wpclever_settings_page_suggestion_content">
                                 <div>
-                                    To display custom engaging real-time messages on any wished positions, please install
-                                    <a href="https://wordpress.org/plugins/wpc-smart-messages/" target="_blank">WPC Smart Messages</a> plugin. It's free!
+                                    To display custom engaging real-time messages on any wished positions, please
+                                    install
+                                    <a href="https://wordpress.org/plugins/wpc-smart-messages/" target="_blank">WPC
+                                        Smart Messages</a> plugin. It's free!
                                 </div>
                                 <div>
                                     Wanna save your precious time working on variations? Try our brand-new free plugin
-                                    <a href="https://wordpress.org/plugins/wpc-variation-bulk-editor/" target="_blank">WPC Variation Bulk Editor</a> and
-                                    <a href="https://wordpress.org/plugins/wpc-variation-duplicator/" target="_blank">WPC Variation Duplicator</a>.
+                                    <a href="https://wordpress.org/plugins/wpc-variation-bulk-editor/" target="_blank">WPC
+                                        Variation Bulk Editor</a> and
+                                    <a href="https://wordpress.org/plugins/wpc-variation-duplicator/" target="_blank">WPC
+                                        Variation Duplicator</a>.
                                 </div>
                             </div>
                         </div>
@@ -1012,7 +1046,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 						}
 
 						// exclude current product
-						$link_products = self::get_linked_products( $link_data );
+						$link_products = self::get_linked_products( $link_data, $context );
 						$link_products = apply_filters( 'wpclv_linked_products', array_diff( $link_products, [ $product_id ] ), $product_id );
 
 						if ( empty( $link_products ) ) {
@@ -1042,7 +1076,9 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
 							do_action( 'wpclv_wrap_before', $link_attributes );
 
-							$link_attributes_slugs = [];
+							$link_attributes_ids = array_map( function ( $e ) {
+								return (int) filter_var( $e, FILTER_SANITIZE_NUMBER_INT );
+							}, $link_attributes );
 
 							foreach ( $link_attributes as $link_attribute ) {
 								$link_attribute_id = (int) filter_var( $link_attribute, FILTER_SANITIZE_NUMBER_INT );
@@ -1052,14 +1088,13 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 									continue;
 								}
 
-								$link_attributes_slugs[] = $attribute->slug;
-
-								$args          = apply_filters( 'wpclv_get_terms_args', [
+								$attribute_limit = apply_filters( 'wpclv_attribute_limit', $limit, $attribute, $context );
+								$args            = apply_filters( 'wpclv_get_terms_args', [
 									'taxonomy'   => $attribute->slug,
 									'hide_empty' => false
-								] );
-								$terms         = get_terms( $args );
-								$current_terms = wc_get_product_terms( $product_id, $attribute->slug, [ 'fields' => 'slugs' ] );
+								], $attribute, $context );
+								$terms           = get_terms( $args );
+								$current_terms   = wc_get_product_terms( $product_id, $attribute->slug, [ 'fields' => 'slugs' ] );
 
 								if ( empty( $terms ) || empty( $current_terms ) ) {
 									continue;
@@ -1091,7 +1126,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 										foreach ( $terms as $term ) {
 											if ( in_array( $term->slug, $current_terms ) ) {
 												// current product
-												if ( ! $limit || $count < $limit ) {
+												if ( ! $attribute_limit || $count < $attribute_limit ) {
 													if ( $use_images ) {
 														self::term( 'image', $attribute, $term, true, $product_id );
 													} elseif ( $use_swatches ) {
@@ -1112,7 +1147,9 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 												];
 
 												foreach ( $product_attributes as $product_attribute_key => $product_attribute ) {
-													if ( ! in_array( $product_attribute_key, $link_attributes_slugs ) ) {
+													$product_attribute_id = wc_attribute_taxonomy_id_by_name( $product_attribute_key );
+
+													if ( ! in_array( $product_attribute_id, $link_attributes_ids ) ) {
 														continue;
 													}
 
@@ -1129,7 +1166,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 												if ( $linked_id = self::get_linked_product_id( $tax_query, $link_products, $linked_products ) ) {
 													$linked_products[] = $linked_id;
 
-													if ( ! $limit || $count < $limit ) {
+													if ( ! $attribute_limit || $count < $attribute_limit ) {
 														if ( $use_images ) {
 															self::term( 'image', $attribute, $term, false, $linked_id );
 														} elseif ( $use_swatches ) {
@@ -1146,7 +1183,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 													if ( $linked_id = apply_filters( 'wpclv_get_imperfect_product', true ) ? self::get_linked_product_id( [ $tax_query_ori ], $link_products, $linked_products ) : 0 ) {
 														$linked_products[] = $linked_id;
 
-														if ( ! $limit || $count < $limit ) {
+														if ( ! $attribute_limit || $count < $attribute_limit ) {
 															if ( $use_images ) {
 																self::term( 'image', $attribute, $term, false, $linked_id );
 															} elseif ( $use_swatches ) {
@@ -1160,7 +1197,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
 														$count ++;
 													} elseif ( self::get_setting( 'hide_empty', 'yes' ) === 'no' ) {
-														if ( ! $limit || $count < $limit ) {
+														if ( ! $attribute_limit || $count < $attribute_limit ) {
 															if ( $use_images ) {
 																self::term( 'image', $attribute, $term, false );
 															} elseif ( $use_swatches ) {
@@ -1182,8 +1219,8 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 											echo '</select>';
 										}
 
-										if ( $limit && ( $limit < $count ) ) {
-											echo '<div class="wpclv-more"><a href="' . esc_url( $_product->get_permalink() ) . '">' . sprintf( apply_filters( 'wpclv_more', self::localization( 'more', /* translators: count */ esc_html__( '+%d More', 'wpc-linked-variation' ) ), ( $count - $limit ) ), ( $count - $limit ) ) . '</a></div>';
+										if ( $attribute_limit && ( $attribute_limit < $count ) ) {
+											echo '<div class="wpclv-more"><a href="' . esc_url( $_product->get_permalink() ) . '">' . sprintf( apply_filters( 'wpclv_more', self::localization( 'more', /* translators: count */ esc_html__( '+%d More', 'wpc-linked-variation' ) ), ( $count - $attribute_limit ) ), ( $count - $attribute_limit ) ) . '</a></div>';
 										}
 
 										do_action( 'wpclv_attribute_terms_after', $attribute );
@@ -1212,7 +1249,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 					echo $link_content;
 				}
 
-				public static function get_linked_products( $link_data ) {
+				public static function get_linked_products( $link_data, $context = 'default' ) {
 					$link_id = $link_data['id'] ?? 0;
 
 					if ( ! self::enable_cache( 'products' ) || ( false === ( $link_products = get_transient( 'wpclv_linked_products_' . $link_id ) ) ) ) {
@@ -1239,7 +1276,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 						}
 					}
 
-					return apply_filters( 'wpclv_get_linked_products', $link_products, $link_data );
+					return apply_filters( 'wpclv_get_linked_products', $link_products, $link_data, $context );
 				}
 
 				public static function get_linked_data( $product ) {
