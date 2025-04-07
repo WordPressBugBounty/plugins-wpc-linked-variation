@@ -3,7 +3,7 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.3.2
+Version: 4.3.3
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
@@ -19,7 +19,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.2' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.3' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -1039,9 +1039,11 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 					}
 
 					if ( ! self::enable_cache( 'content' ) || ( false === ( $link_content = get_transient( 'wpclv_linked_content_' . $context . '_' . $product_id ) ) ) ) {
-						$link_data = self::get_linked_data( $_product );
+						$link_data = self::get_linked_data( $_product, $context );
 
 						if ( empty( $link_data ) ) {
+							do_action( 'wpclv_no_linked_data', $product_id, $context );
+
 							return;
 						}
 
@@ -1050,6 +1052,8 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 						$link_products = apply_filters( 'wpclv_linked_products', array_diff( $link_products, [ $product_id ] ), $product_id );
 
 						if ( empty( $link_products ) ) {
+							do_action( 'wpclv_no_linked_products', $product_id, $context );
+
 							return;
 						}
 
@@ -1242,7 +1246,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 						$link_content = ob_get_clean();
 
 						if ( self::enable_cache( 'content' ) ) {
-							set_transient( 'wpclv_linked_content_' . $product_id, $link_content, 24 * HOUR_IN_SECONDS );
+							set_transient( 'wpclv_linked_content_' . $context . '_' . $product_id, $link_content, 24 * HOUR_IN_SECONDS );
 						}
 					}
 
@@ -1279,7 +1283,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 					return apply_filters( 'wpclv_get_linked_products', $link_products, $link_data, $context );
 				}
 
-				public static function get_linked_data( $product ) {
+				public static function get_linked_data( $product, $context = 'default' ) {
 					if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
 						return false;
 					}
@@ -1288,7 +1292,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
 					if ( ! self::enable_cache( 'data' ) || ( false === ( $linked_data = get_transient( 'wpclv_linked_data_' . $product_id ) ) ) ) {
 						$linked_data = [];
-						$links       = get_posts( [
+						$links       = get_posts( apply_filters( 'wpclv_get_linked_args', [
 							'post_type'              => 'wpclv',
 							'post_status'            => 'publish',
 							'posts_per_page'         => 500, // get all linked
@@ -1296,7 +1300,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 							'update_post_term_cache' => false,
 							'update_post_meta_cache' => false,
 							'fields'                 => 'ids'
-						] );
+						] ) );
 
 						if ( ! empty( $links ) ) {
 							foreach ( $links as $link_id ) {
@@ -1363,7 +1367,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 						}
 					}
 
-					return apply_filters( 'wpclv_get_linked_data', $linked_data, $product );
+					return apply_filters( 'wpclv_get_linked_data', $linked_data, $product, $context );
 				}
 
 				public static function enable_cache( $context = 'default' ) {
