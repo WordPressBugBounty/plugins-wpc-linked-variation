@@ -3,23 +3,23 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.3.3
+Version: 4.3.4
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
 Domain Path: /languages/
 Requires Plugins: woocommerce
 Requires at least: 4.0
-Tested up to: 6.7
+Tested up to: 6.8
 WC requires at least: 3.0
-WC tested up to: 9.7
+WC tested up to: 9.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.3' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.4' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -215,7 +215,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 						$output = ob_get_clean();
 					}
 
-					return $output;
+					return apply_filters( 'wpclv_shortcode', $output, $attrs );
 				}
 
 				function add_meta_boxes() {
@@ -233,13 +233,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                         <tr>
                             <td colspan="2">
                                 <div class="wpclv_links">
-									<?php
-									if ( ! empty( $link ) ) {
-										self::get_link( $link );
-									} else {
-										self::get_link();
-									}
-									?>
+									<?php self::get_link( $link ?? null ); ?>
                                 </div>
                             </td>
                         </tr>
@@ -315,27 +309,27 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                                                                    name="wpclv_link[terms_all]"
                                                                                    value="1" <?php echo( ! empty( $terms_all ) ? 'checked' : '' ); ?>/><?php esc_html_e( 'All (any)', 'wpc-linked-variation' ); ?></label> <u><?php esc_html_e( 'or', 'wpc-linked-variation' ); ?></u> </span>
                                 <span class="wpclv-source-terms-select" style="flex-grow: 1;">
-                                <input class="wpclv-terms-val" type="hidden" style="width: 100%"
-                                       name="wpclv_link[terms]" value="<?php echo esc_attr( $link_terms ); ?>"/>
-								<?php
-								if ( ! is_array( $link_terms ) ) {
-									$link_terms = array_map( 'trim', explode( ',', $link_terms ) );
-								}
-								?>
-                                <label>
-<select class="wpclv-terms-select" multiple="multiple"
-        data-<?php echo esc_attr( $link_source ); ?>="<?php echo esc_attr( implode( ',', $link_terms ) ); ?>">
-    <?php
-    if ( ! empty( $link_terms ) ) {
-	    foreach ( $link_terms as $t ) {
-		    if ( $term = get_term_by( 'slug', $t, $link_source ) ) {
-			    echo '<option value="' . esc_attr( $t ) . '" selected>' . esc_html( $term->name ) . '</option>';
-		    }
-	    }
-    }
-    ?>
-</select>
-</label>
+                                    <input class="wpclv-terms-val" type="hidden" style="width: 100%"
+                                           name="wpclv_link[terms]" value="<?php echo esc_attr( $link_terms ); ?>"/>
+                                    <?php
+                                    if ( ! is_array( $link_terms ) ) {
+	                                    $link_terms = array_map( 'trim', explode( ',', $link_terms ) );
+                                    }
+                                    ?>
+                                    <label>
+                                        <select class="wpclv-terms-select" multiple="multiple"
+                                                data-<?php echo esc_attr( $link_source ); ?>="<?php echo esc_attr( implode( ',', $link_terms ) ); ?>">
+                                            <?php
+                                            if ( ! empty( $link_terms ) ) {
+	                                            foreach ( $link_terms as $t ) {
+		                                            if ( $term = get_term_by( 'slug', $t, $link_source ) ) {
+			                                            echo '<option value="' . esc_attr( $t ) . '" selected>' . esc_html( $term->name ) . '</option>';
+		                                            }
+	                                            }
+                                            }
+                                            ?>
+                                        </select>
+                                    </label>
                                 </span>
                             </div>
                         </div>
@@ -633,7 +627,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                                         <option value="below_title" <?php selected( $position, 'below_title' ); ?>><?php esc_html_e( 'Under the title', 'wpc-linked-variation' ); ?></option>
                                                         <option value="below_price" <?php selected( $position, 'below_price' ); ?>><?php esc_html_e( 'Under the price', 'wpc-linked-variation' ); ?></option>
                                                         <option value="below_excerpt" <?php selected( $position, 'below_excerpt' ); ?>><?php esc_html_e( 'Under the excerpt', 'wpc-linked-variation' ); ?></option>
-                                                        <option value="no" <?php selected( $position, 'no' ); ?>><?php esc_html_e( 'No (hide it)', 'wpc-linked-variation' ); ?></option>
+                                                        <option value="no" <?php selected( $position, 'no' ); ?>><?php esc_html_e( 'None (hide it)', 'wpc-linked-variation' ); ?></option>
                                                     </select> </label>
                                                 <span class="description"><?php esc_html_e( 'Choose the position to show the linked variations on single product page.', 'wpc-linked-variation' ); ?></span>
                                             </td>
@@ -646,7 +640,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                                         <option value="below" <?php selected( $position_archive, 'below' ); ?>><?php esc_html_e( 'Under the add to cart button', 'wpc-linked-variation' ); ?></option>
                                                         <option value="below_title" <?php selected( $position_archive, 'below_title' ); ?>><?php esc_html_e( 'Under the title', 'wpc-linked-variation' ); ?></option>
                                                         <option value="below_price" <?php selected( $position_archive, 'below_price' ); ?>><?php esc_html_e( 'Under the price', 'wpc-linked-variation' ); ?></option>
-                                                        <option value="no" <?php selected( $position_archive, 'no' ); ?>><?php esc_html_e( 'No (hide it)', 'wpc-linked-variation' ); ?></option>
+                                                        <option value="no" <?php selected( $position_archive, 'no' ); ?>><?php esc_html_e( 'None (hide it)', 'wpc-linked-variation' ); ?></option>
                                                     </select> </label>
                                                 <span class="description"><?php esc_html_e( 'Choose the position to show the linked variations on archive page.', 'wpc-linked-variation' ); ?></span>
                                                 <p>
