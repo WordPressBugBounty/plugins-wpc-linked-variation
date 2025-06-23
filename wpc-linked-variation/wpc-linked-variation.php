@@ -3,7 +3,7 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.3.4
+Version: 4.3.5
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
@@ -12,14 +12,14 @@ Requires Plugins: woocommerce
 Requires at least: 4.0
 Tested up to: 6.8
 WC requires at least: 3.0
-WC tested up to: 9.8
+WC tested up to: 9.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.4' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.5' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -248,7 +248,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 					$link_source     = $link['source'] ?? 'products';
 					$link_products   = $link['products'] ?? '';
 					$link_terms      = $link['terms'] ?? '';
-					$link_limit      = $link['limit'] ?? 100;
+					$link_limit      = $link['limit'] ?? 500;
 					$link_orderby    = $link['orderby'] ?? 'default';
 					$link_order      = $link['order'] ?? 'default';
 					$terms_all       = $link['terms_all'] ?? '';
@@ -559,19 +559,28 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 					$active_tab = sanitize_key( $_GET['tab'] ?? 'settings' );
 					?>
                     <div class="wpclever_settings_page wrap">
-                        <h1 class="wpclever_settings_page_title"><?php echo esc_html__( 'WPC Linked Variation', 'wpc-linked-variation' ) . ' ' . esc_html( WPCLV_VERSION ) . ' ' . ( defined( 'WPCLV_PREMIUM' ) ? '<span class="premium" style="display: none">' . esc_html__( 'Premium', 'wpc-linked-variation' ) . '</span>' : '' ); ?></h1>
-                        <div class="wpclever_settings_page_desc about-text">
-                            <p>
-								<?php printf( /* translators: stars */ esc_html__( 'Thank you for using our plugin! If you are satisfied, please reward it a full five-star %s rating.', 'wpc-linked-variation' ), '<span style="color:#ffb900">&#9733;&#9733;&#9733;&#9733;&#9733;</span>' ); ?>
-                                <br/>
-                                <a href="<?php echo esc_url( WPCLV_REVIEWS ); ?>"
-                                   target="_blank"><?php esc_html_e( 'Reviews', 'wpc-linked-variation' ); ?></a> |
-                                <a href="<?php echo esc_url( WPCLV_CHANGELOG ); ?>"
-                                   target="_blank"><?php esc_html_e( 'Changelog', 'wpc-linked-variation' ); ?></a> |
-                                <a href="<?php echo esc_url( WPCLV_DISCUSSION ); ?>"
-                                   target="_blank"><?php esc_html_e( 'Discussion', 'wpc-linked-variation' ); ?></a>
-                            </p>
+                        <div class="wpclever_settings_page_header">
+                            <a class="wpclever_settings_page_header_logo" href="https://wpclever.net/"
+                               target="_blank" title="Visit wpclever.net"></a>
+                            <div class="wpclever_settings_page_header_text">
+                                <div class="wpclever_settings_page_title"><?php echo esc_html__( 'WPC Linked Variation', 'wpc-linked-variation' ) . ' ' . esc_html( WPCLV_VERSION ) . ' ' . ( defined( 'WPCLV_PREMIUM' ) ? '<span class="premium" style="display: none">' . esc_html__( 'Premium', 'wpc-linked-variation' ) . '</span>' : '' ); ?></div>
+                                <div class="wpclever_settings_page_desc about-text">
+                                    <p>
+										<?php printf( /* translators: stars */ esc_html__( 'Thank you for using our plugin! If you are satisfied, please reward it a full five-star %s rating.', 'wpc-linked-variation' ), '<span style="color:#ffb900">&#9733;&#9733;&#9733;&#9733;&#9733;</span>' ); ?>
+                                        <br/>
+                                        <a href="<?php echo esc_url( WPCLV_REVIEWS ); ?>"
+                                           target="_blank"><?php esc_html_e( 'Reviews', 'wpc-linked-variation' ); ?></a>
+                                        |
+                                        <a href="<?php echo esc_url( WPCLV_CHANGELOG ); ?>"
+                                           target="_blank"><?php esc_html_e( 'Changelog', 'wpc-linked-variation' ); ?></a>
+                                        |
+                                        <a href="<?php echo esc_url( WPCLV_DISCUSSION ); ?>"
+                                           target="_blank"><?php esc_html_e( 'Discussion', 'wpc-linked-variation' ); ?></a>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
+                        <h2></h2>
 						<?php if ( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] ) { ?>
                             <div class="notice notice-success is-dismissible">
                                 <p><?php esc_html_e( 'Settings updated.', 'wpc-linked-variation' ); ?></p>
