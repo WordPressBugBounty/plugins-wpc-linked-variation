@@ -3,7 +3,7 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.3.5
+Version: 4.3.6
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
@@ -12,14 +12,14 @@ Requires Plugins: woocommerce
 Requires at least: 4.0
 Tested up to: 6.8
 WC requires at least: 3.0
-WC tested up to: 9.9
+WC tested up to: 10.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.5' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.6' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -826,7 +826,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 					<?php
 				}
 
-				public static function term( $type, $attribute, $term, $active, $product_id = 0 ) {
+				public static function term( $type, $attribute, $term, $active = false, $product_id = 0, $imperfect = false ) {
 					$link             = self::get_setting( 'link', 'yes' );
 					$nofollow         = self::get_setting( 'nofollow', 'no' ) === 'yes';
 					$tooltip_library  = self::get_setting( 'tooltip_library', 'hint' );
@@ -856,9 +856,9 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 						$tooltip_content = '';
 					}
 
-					$tooltip_content = apply_filters( 'wpclv_tooltip_content', $tooltip_content, $type, $attribute, $term, $active, $product_id );
-					$tooltip_class   = apply_filters( 'wpclv_tooltip_class', $tooltip_class, $type, $attribute, $term, $active, $product_id );
-					$term_class      = apply_filters( 'wpclv_term_class', 'wpclv-term ' . $tooltip_class . ( $active ? ' active' : '' ), $type, $attribute, $term, $active, $product_id );
+					$tooltip_content = apply_filters( 'wpclv_tooltip_content', $tooltip_content, $type, $attribute, $term, $active, $product_id, $imperfect );
+					$tooltip_class   = apply_filters( 'wpclv_tooltip_class', $tooltip_class, $type, $attribute, $term, $active, $product_id, $imperfect );
+					$term_class      = apply_filters( 'wpclv_term_class', 'wpclv-term ' . $tooltip_class . ( $active ? ' active' : '' ) . ( $imperfect ? ' imperfect' : '' ), $type, $attribute, $term, $active, $product_id, $imperfect );
 
 					switch ( $type ) {
 						case 'swatches':
@@ -1192,13 +1192,13 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
 														if ( ! $attribute_limit || $count < $attribute_limit ) {
 															if ( $use_images ) {
-																self::term( 'image', $attribute, $term, false, $linked_id );
+																self::term( 'image', $attribute, $term, false, $linked_id, true );
 															} elseif ( $use_swatches ) {
-																self::term( 'swatches', $attribute, $term, false, $linked_id );
+																self::term( 'swatches', $attribute, $term, false, $linked_id, true );
 															} elseif ( $use_dropdown ) {
-																self::term( 'dropdown', $attribute, $term, false, $linked_id );
+																self::term( 'dropdown', $attribute, $term, false, $linked_id, true );
 															} else {
-																self::term( 'button', $attribute, $term, false, $linked_id );
+																self::term( 'button', $attribute, $term, false, $linked_id, true );
 															}
 														}
 
