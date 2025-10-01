@@ -3,22 +3,22 @@ Contributors: wpclever
 Donate link: https://wpclever.net
 Tags: woocommerce, wpc, linked variations, variation
 Tested up to: 6.8
-Version: 4.3.6
-Stable tag: 4.3.6
+Version: 4.3.7
+Stable tag: 4.3.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-WPC Linked Variation built to link separate products together by attributes.
+WPC Linked Variation is built to link separate products together by attributes.
 
 == Description ==
 
 **WPC Linked Variation** is a sharp tool for WooCommerce store owners to make life simple and easy. It allows users to connect a group of any product types together by attribute(s) while they can still be managed as separated products. All products will be organized neatly by attributes with an elegant swatches style just as the variation swatches look for normal variable products.
 
-What is worth mentioning is that our plugin allows users to link items of many product types together. In your dream, have you ever wondered how you can group a [Product Bundles](https://wordpress.org/plugins/woo-product-bundle/), a [Smart Grouped Product](https://wordpress.org/plugins/wpc-grouped-product/), and a [Composite Products](https://wordpress.org/plugins/wpc-composite-products/) together? This plugin just realizes your dream. No complex codes. Just need to create a common attribute(s) then configure the terms for them then you can effortlessly configure the swatches display for those products.
+What is worth mentioning is that our plugin allows users to link items of many product types together. In your dream, have you ever wondered how you can group a [Product Bundles](https://wordpress.org/plugins/woo-product-bundle/), a [Smart Grouped Product](https://wordpress.org/plugins/wpc-grouped-product/), and a [Composite Products](https://wordpress.org/plugins/wpc-composite-products/) together? This plugin just realizes your dream. No complex codes. Need to create a common attribute(s) then configure the terms for them, then you can effortlessly configure the swatches display for those products.
 
-If you have ever felt exhausted from finding useful tools to configure complex settings at the variation level, this plugin will save the day. Many of the great plugins, including most of our WPC plugins, are only available at the product level. With this plugin, you can still utilize plugins on your products while linking them together at ease and showcase in an informative style.
+If you have ever felt exhausted from finding useful tools to configure complex settings at the variation level, this plugin will save the day. Many of the great plugins, including most of our WPC plugins, are only available at the product level. With this plugin, you can still use plugins on your products while linking them together at ease and showcase in an informative style.
 
-Noticeably, **WPC Linked Variation** is integrated with the Quick View feature from the [WPC Smart Quick View](https://wordpress.org/plugins/woo-smart-quick-view/) plugin, which allows buyers to preview products right on the current page. This helps improve the user experience and make customers stay on track with the currently viewed products.
+Noticeably, **WPC Linked Variation** is integrated with the Quick View feature from the [WPC Smart Quick View](https://wordpress.org/plugins/woo-smart-quick-view/) plugin, which allows buyers to preview products right on the current page. This helps improve the user experience and makes customers stay on track with the currently viewed products.
 
 = Live demo =
 
@@ -40,24 +40,24 @@ https://www.youtube.com/watch?v=7_EJqkEXdAQ
 
 = Steps to set up linked variations =
 
-**STEP 1:** Create the attributes by navigating to WooCommerce >> Attributes, configure a name, slug then click on Configure the terms button to add terms.
+**STEP 1:** Create the attributes by navigating to WooCommerce >> Attributes, configure a name, slug, then click on the Configure the terms button to add terms.
 
 If the attributes you need have already been created, you still need to check carefully if the terms are fully configured or not.
 
-**STEP 2:** Go to the single product page, in the Product Data section, open the Attributes tab and check the drop-down list to make sure the attributes chosen are the ones configured in the Attributes section above.
+**STEP 2:** Go to the single product page, in the Product Data section, open the Attributes tab, and check the drop-down list to make sure the attributes chosen are the ones configured in the Attributes section above.
 
-Since WPC Linked Variations will display swatches buttons for linked variations, it’s important that all terms under each attribute be fully configured. If you click to create new custom attributes, then configure the terms in the Attributes tab of the product page, this won’t work and those attributes won’t be displayed in the swatches.
+Since WPC Linked Variations will display swatches buttons for linked variations, it’s important that all terms under each attribute be fully configured. If you click to create new custom attributes, then configure the terms in the Attributes tab of the product page, this won’t work, and those attributes won’t be displayed in the swatches.
 
 **STEP 3:** Make sure you have properly added the chosen attributes to all products that are about to be linked.
 
 - The selected attributes for linked variation must be common for all chosen products.
-- The terms used for variations must be distinctive in order to distinguish between. linked variations in the preview step.
+- The terms used for variations must be distinctive to distinguish between. Linked variations in the preview step.
 
 For example:
 
 The chosen Attributes - Color must be chosen in the Attributes tab of both product A & product B. The terms chosen for each item must be different from each other: Color - Blue for product A & Color - Red for product B.
 
-Or both can have the same color but they need a second common attribute where they can be distinguished.
+Or both can have the same color, but they need a second common attribute where they can be distinguished.
 
 **STEP 4:** Navigate to WPClever >> Linked Variation:
 
@@ -79,10 +79,14 @@ Good luck and enjoy our plugin.
 
 1. Please make sure that you installed WooCommerce
 2. Go to plugins in your dashboard and select "Add New"
-3. Search for "WPC Linked Variation", Install & Activate it
+3. Search for "WPC Linked Variation," Install & Activate it
 4. Go to WP-admin > WPClever > Linked Variation to add linked variations
 
 == Changelog ==
+
+= 4.3.7 =
+* Fixed: Minor CSS/JS issues in the backend
+* Updated: Compatible with WP 6.8 & Woo 10.2
 
 = 4.3.6 =
 * Updated: Optimized the code
