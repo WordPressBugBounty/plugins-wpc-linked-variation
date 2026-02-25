@@ -3,23 +3,23 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.3.8
+Version: 4.3.9
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
 Domain Path: /languages/
 Requires Plugins: woocommerce
 Requires at least: 4.0
-Tested up to: 6.8
+Tested up to: 6.9
 WC requires at least: 3.0
-WC tested up to: 10.3
+WC tested up to: 10.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.8' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.9' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -1160,7 +1160,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                                 $tax_query     = [];
                                                 $tax_query_ori = [
                                                         'taxonomy' => $term->taxonomy,
-                                                        'term'     => $term->slug
+                                                        'term'     => $term->term_id
                                                 ];
 
                                                 foreach ( $product_attributes as $product_attribute_key => $product_attribute ) {
