@@ -3,7 +3,7 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.3.9
+Version: 4.4.0
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
@@ -12,14 +12,14 @@ Requires Plugins: woocommerce
 Requires at least: 4.0
 Tested up to: 6.9
 WC requires at least: 3.0
-WC tested up to: 10.5
+WC tested up to: 10.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.3.9' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.4.0' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -30,6 +30,7 @@ defined( 'ABSPATH' ) || exit;
 ! defined( 'WPCLV_DISCUSSION' ) && define( 'WPCLV_DISCUSSION', 'https://wordpress.org/support/plugin/wpc-linked-variation' );
 ! defined( 'WPC_URI' ) && define( 'WPC_URI', WPCLV_URI );
 
+include 'includes/log/wpc-log.php';
 include 'includes/dashboard/wpc-dashboard.php';
 include 'includes/kit/wpc-kit.php';
 include 'includes/hpos.php';
@@ -76,6 +77,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                     add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
                     add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ] );
                     add_action( 'admin_init', [ $this, 'register_settings' ] );
+                    add_filter( 'pre_update_option', [ $this, 'last_saved' ], 10, 2 );
                     add_action( 'admin_menu', [ $this, 'admin_menu' ] );
 
                     switch ( self::get_setting( 'position', 'above' ) ) {
@@ -207,7 +209,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
                         if ( self::enable_ajax( 'shortcode' ) ) {
                             // render wrapper only
-                            echo '<div class="' . esc_attr( apply_filters( 'wpclv_wrap_class', 'wpclv-attributes wpclv-attributes-shortcode wpclv-attributes-' . $attrs['id'], 'shortcode' ) ) . '" data-id="' . esc_attr( $attrs['id'] ) . '"></div>';
+                            echo '<div class="' . esc_attr( apply_filters( 'wpclv_wrap_class', 'wpclv-attributes wpclv-attributes-ajax wpclv-attributes-shortcode wpclv-attributes-' . $attrs['id'], 'shortcode' ) ) . '" data-id="' . esc_attr( $attrs['id'] ) . '"></div>';
                         } else {
                             self::render_content( $attrs['id'], absint( $attrs['limit'] ), $attrs['hide'], 'shortcode' );
                         }
@@ -553,6 +555,15 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                     ] );
                 }
 
+                function last_saved( $value, $option ) {
+                    if ( $option == 'wpclv_settings' || $option == 'wpclv_localization' ) {
+                        $value['_last_saved']    = current_time( 'timestamp' );
+                        $value['_last_saved_by'] = get_current_user_id();
+                    }
+
+                    return $value;
+                }
+
                 function admin_menu() {
                     add_submenu_page( 'wpclever', esc_html__( 'WPC Linked Variation', 'wpc-linked-variation' ), esc_html__( 'Linked Variation', 'wpc-linked-variation' ), 'manage_options', 'wpclever-wpclv', [
                             $this,
@@ -760,7 +771,16 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                         </tr>
                                         <tr class="submit">
                                             <th colspan="2">
-                                                <?php settings_fields( 'wpclv_settings' ); ?><?php submit_button(); ?>
+                                                <div class="wpclever_submit">
+                                                    <?php
+                                                    settings_fields( 'wpclv_settings' );
+                                                    submit_button( '', 'primary', 'submit', false );
+
+                                                    if ( function_exists( 'wpc_last_saved' ) ) {
+                                                        wpc_last_saved( self::get_settings() );
+                                                    }
+                                                    ?>
+                                                </div>
                                                 <a style="display: none;" class="wpclever_export"
                                                    data-key="wpclv_settings"
                                                    data-name="settings"
@@ -1010,7 +1030,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
                     if ( self::enable_ajax( 'archive' ) ) {
                         // render wrapper only
-                        echo '<div class="' . esc_attr( apply_filters( 'wpclv_wrap_class', 'wpclv-attributes wpclv-attributes-archive wpclv-attributes-' . $product_id, 'archive' ) ) . '" data-id="' . esc_attr( $product_id ) . '"></div>';
+                        echo '<div class="' . esc_attr( apply_filters( 'wpclv_wrap_class', 'wpclv-attributes wpclv-attributes-ajax wpclv-attributes-archive wpclv-attributes-' . $product_id, 'archive' ) ) . '" data-id="' . esc_attr( $product_id ) . '"></div>';
                     } else {
                         $limit = absint( self::get_setting( 'archive_limit', '10' ) );
                         self::render_content( $product_id, $limit, '', 'archive' );
@@ -1032,7 +1052,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
                     if ( self::enable_ajax( 'single' ) ) {
                         // render wrapper only
-                        echo '<div class="' . esc_attr( apply_filters( 'wpclv_wrap_class', 'wpclv-attributes wpclv-attributes-single wpclv-attributes-' . $product_id, 'single' ) ) . '" data-id="' . esc_attr( $product_id ) . '"></div>';
+                        echo '<div class="' . esc_attr( apply_filters( 'wpclv_wrap_class', 'wpclv-attributes wpclv-attributes-ajax wpclv-attributes-single wpclv-attributes-' . $product_id, 'single' ) ) . '" data-id="' . esc_attr( $product_id ) . '"></div>';
                     } else {
                         self::render_content( $product_id, $limit, $hide, 'single' );
                     }
@@ -1075,11 +1095,12 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                         $link_swatches       = $link_data['swatches'] ?? [];
                         $link_dropdown       = $link_data['dropdown'] ?? [];
                         $hide_attributes     = ! empty( $hide ) ? explode( ',', $hide ) : [];
-                        $assigned_attributes = array_keys( $_product->get_attributes() );
+                        $assigned_attributes = $_product->get_attributes();
                         $product_attributes  = [];
 
                         foreach ( $assigned_attributes as $assigned_attribute ) {
-                            $product_attributes[ $assigned_attribute ] = wc_get_product_terms( $product_id, $assigned_attribute, [ 'fields' => 'ids' ] );
+                            $assigned_attribute_name                        = $assigned_attribute->get_name();
+                            $product_attributes[ $assigned_attribute_name ] = wc_get_product_terms( $product_id, $assigned_attribute_name, [ 'fields' => 'ids' ] );
                         }
 
                         ob_start();
