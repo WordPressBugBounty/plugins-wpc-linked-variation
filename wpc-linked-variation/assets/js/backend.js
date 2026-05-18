@@ -92,7 +92,7 @@
             ajax: {
                 url: ajaxurl, dataType: 'json', delay: 250, data: function (params) {
                     return {
-                        q: params.term, action: 'wpclv_search_term', taxonomy: source,
+                        q: params.term, action: 'wpclv_search_term', taxonomy: source, security: wpclv_vars.wpclv_nonce
                     };
                 }, processResults: function (data) {
                     var options = [];

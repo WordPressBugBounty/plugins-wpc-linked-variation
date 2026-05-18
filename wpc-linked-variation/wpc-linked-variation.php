@@ -3,7 +3,7 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.4.0
+Version: 4.4.1
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
@@ -12,14 +12,14 @@ Requires Plugins: woocommerce
 Requires at least: 4.0
 Tested up to: 6.9
 WC requires at least: 3.0
-WC tested up to: 10.6
+WC tested up to: 10.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.4.0' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.4.1' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -28,12 +28,14 @@ defined( 'ABSPATH' ) || exit;
 ! defined( 'WPCLV_REVIEWS' ) && define( 'WPCLV_REVIEWS', 'https://wordpress.org/support/plugin/wpc-linked-variation/reviews/' );
 ! defined( 'WPCLV_CHANGELOG' ) && define( 'WPCLV_CHANGELOG', 'https://wordpress.org/plugins/wpc-linked-variation/#developers' );
 ! defined( 'WPCLV_DISCUSSION' ) && define( 'WPCLV_DISCUSSION', 'https://wordpress.org/support/plugin/wpc-linked-variation' );
-! defined( 'WPC_URI' ) && define( 'WPC_URI', WPCLV_URI );
 
-include 'includes/log/wpc-log.php';
-include 'includes/dashboard/wpc-dashboard.php';
-include 'includes/kit/wpc-kit.php';
-include 'includes/hpos.php';
+// WPC Core
+require_once __DIR__ . '/includes/wpc-core/wpc-core.php';
+wpc_core_register( [
+	'file'    => __FILE__,
+	'version' => WPCLV_VERSION,
+	'prefix'  => 'wpclv',
+] );
 
 if ( ! function_exists( 'wpclv_init' ) ) {
     add_action( 'plugins_loaded', 'wpclv_init', 11 );
@@ -230,6 +232,8 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                 function meta_box_callback( $post ) {
                     $post_id = $post->ID;
                     $link    = get_post_meta( $post_id, 'wpclv_link', true );
+                    
+                    wp_nonce_field( 'wpclv_meta_box', 'wpclv_meta_box_nonce' );
                     ?>
                     <table class="form-table">
                         <tr>
@@ -268,7 +272,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                 <label> <select class="wpclv-source" name="wpclv_link[source]">
                                         <option value="products" <?php selected( $link_source, 'products' ); ?>><?php esc_html_e( 'Products', 'wpc-linked-variation' ); ?></option>
                                         <?php
-                                        $taxonomies = get_object_taxonomies( 'product', 'objects' ); //$taxonomies = get_taxonomies( [ 'object_type' => [ 'product' ] ], 'objects' );
+                                        $taxonomies = get_object_taxonomies( 'product', 'objects' ); 
 
                                         foreach ( $taxonomies as $taxonomy ) {
                                             echo '<option value="' . esc_attr( $taxonomy->name ) . '" ' . ( $link_source === $taxonomy->name ? 'selected' : '' ) . ' disabled>' . esc_html( $taxonomy->label ) . '</option>';
@@ -395,7 +399,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
                                     foreach ( $merge_attributes as $attribute_id => $attribute_label ) {
                                         if ( $attribute = wc_get_attribute( (int) filter_var( $attribute_id, FILTER_SANITIZE_NUMBER_INT ) ) ) {
-                                            echo '<div class="wpclv-attribute"><span class="move">' . esc_html__( 'Move', 'wpc-linked-variation' ) . '</span><span class="checkbox"><label><input type="checkbox" name="wpclv_link[attributes][]" value="' . $attribute_id . '" ' . ( is_array( $link_attributes ) && in_array( $attribute_id, $link_attributes ) ? 'checked' : '' ) . '/>' . $attribute_label . ' <span class="slug">' . $attribute->slug . '</span></label></span><span class="display"><label><input type="checkbox" class="wpclv_display_checkbox" name="wpclv_link[images][]" value="' . $attribute_id . '" ' . ( is_array( $link_images ) && in_array( $attribute_id, $link_images ) ? 'checked' : '' ) . '/>' . esc_html__( 'Show images', 'wpc-linked-variation' ) . '</label></span><span class="display"><label><input type="checkbox" class="wpclv_display_checkbox" name="wpclv_link[dropdown][]" value="' . $attribute_id . '" ' . ( isset( $link['dropdown'] ) && is_array( $link['dropdown'] ) && in_array( $attribute_id, $link['dropdown'] ) ? 'checked' : '' ) . '/>' . esc_html__( 'Use dropdown', 'wpc-linked-variation' ) . '</label></span><span class="display"><label><input type="checkbox" class="wpclv_display_checkbox" name="wpclv_link[swatches][]" value="' . $attribute_id . '" ' . ( isset( $link_swatches ) && is_array( $link_swatches ) && in_array( $attribute_id, $link_swatches ) ? 'checked' : '' ) . '/>' . esc_html__( 'Use swatches', 'wpc-linked-variation' ) . '</label></span></div>';
+                                            echo '<div class="wpclv-attribute"><span class="move">' . esc_html__( 'Move', 'wpc-linked-variation' ) . '</span><span class="checkbox"><label><input type="checkbox" name="wpclv_link[attributes][]" value="' . esc_attr( $attribute_id ) . '" ' . ( is_array( $link_attributes ) && in_array( $attribute_id, $link_attributes ) ? 'checked' : '' ) . '/>' . esc_html( $attribute_label ) . ' <span class="slug">' . esc_html( $attribute->slug ) . '</span></label></span><span class="display"><label><input type="checkbox" class="wpclv_display_checkbox" name="wpclv_link[images][]" value="' . esc_attr( $attribute_id ) . '" ' . ( is_array( $link_images ) && in_array( $attribute_id, $link_images ) ? 'checked' : '' ) . '/>' . esc_html__( 'Show images', 'wpc-linked-variation' ) . '</label></span><span class="display"><label><input type="checkbox" class="wpclv_display_checkbox" name="wpclv_link[dropdown][]" value="' . esc_attr( $attribute_id ) . '" ' . ( isset( $link['dropdown'] ) && is_array( $link['dropdown'] ) && in_array( $attribute_id, $link['dropdown'] ) ? 'checked' : '' ) . '/>' . esc_html__( 'Use dropdown', 'wpc-linked-variation' ) . '</label></span><span class="display"><label><input type="checkbox" class="wpclv_display_checkbox" name="wpclv_link[swatches][]" value="' . esc_attr( $attribute_id ) . '" ' . ( isset( $link_swatches ) && is_array( $link_swatches ) && in_array( $attribute_id, $link_swatches ) ? 'checked' : '' ) . '/>' . esc_html__( 'Use swatches', 'wpc-linked-variation' ) . '</label></span></div>';
                                         }
                                     }
 
@@ -418,8 +422,17 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                 }
 
                 function save_meta_boxes( $post_id ) {
+                    if ( ! isset( $_POST['wpclv_meta_box_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['wpclv_meta_box_nonce'] ) ), 'wpclv_meta_box' ) ) {
+                        return;
+                    }
+
+                    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+                        return;
+                    }
+
                     if ( isset( $_POST['wpclv_link'] ) ) {
-                        update_post_meta( $post_id, 'wpclv_link', self::sanitize_array( $_POST['wpclv_link'] ) );
+                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+                        update_post_meta( $post_id, 'wpclv_link', self::sanitize_array( wp_unslash( $_POST['wpclv_link'] ) ) );
                     }
                 }
 
@@ -465,21 +478,21 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                                 }
                                             }
 
-                                            echo implode( ', ', $names );
+                                            echo esc_html( implode( ', ', $names ) );
                                         }
 
                                         break;
                                     case 'categories':
-                                        echo esc_html__( 'Categories', 'wpc-linked-variation' ) . ': ' . $info['categories'];
+                                        echo esc_html__( 'Categories', 'wpc-linked-variation' ) . ': ' . esc_html( $info['categories'] );
 
                                         break;
                                     case 'tags':
-                                        echo esc_html__( 'Tags', 'wpc-linked-variation' ) . ': ' . $info['tags'];
+                                        echo esc_html__( 'Tags', 'wpc-linked-variation' ) . ': ' . esc_html( $info['tags'] );
 
                                         break;
                                     default:
                                         if ( $taxonomy = get_taxonomy( $info['source'] ) ) {
-                                            echo esc_html( $taxonomy->label ) . ': ' . $info['terms'];
+                                            echo esc_html( $taxonomy->label ) . ': ' . esc_html( $info['terms'] );
                                         }
 
                                         break;
@@ -499,7 +512,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                 }
 
                                 if ( ! empty( $attr_names ) ) {
-                                    echo implode( ', ', $attr_names );
+                                    echo esc_html( implode( ', ', $attr_names ) );
                                 }
                             }
                         }
@@ -508,12 +521,12 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
                 function enqueue_scripts() {
                     if ( self::get_setting( 'tooltip_library', 'hint' ) === 'hint' ) {
-                        wp_enqueue_style( 'hint', WPCLV_URI . 'assets/libs/hint/hint.css' );
+                        wp_enqueue_style( 'hint', WPCLV_URI . 'assets/libs/hint/hint.css', [], WPCLV_VERSION );
                     }
 
                     if ( self::get_setting( 'tooltip_library', 'hint' ) === 'tippy' ) {
-                        wp_enqueue_script( 'popper', WPCLV_URI . 'assets/libs/tippy/popper.min.js', [ 'jquery' ], WPCLV_VERSION );
-                        wp_enqueue_script( 'tippy', WPCLV_URI . 'assets/libs/tippy/tippy-bundle.umd.min.js', [ 'jquery' ], WPCLV_VERSION );
+                        wp_enqueue_script( 'popper', WPCLV_URI . 'assets/libs/tippy/popper.min.js', [ 'jquery' ], WPCLV_VERSION, true );
+                        wp_enqueue_script( 'tippy', WPCLV_URI . 'assets/libs/tippy/tippy-bundle.umd.min.js', [ 'jquery' ], WPCLV_VERSION, true );
                     }
 
                     wp_enqueue_style( 'wpclv-frontend', WPCLV_URI . 'assets/css/frontend.css', [], WPCLV_VERSION );
@@ -573,6 +586,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
                 function admin_menu_content() {
                     add_thickbox();
+                    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                     $active_tab = sanitize_key( $_GET['tab'] ?? 'settings' );
                     ?>
                     <div class="wpclever_settings_page wrap">
@@ -598,7 +612,9 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                             </div>
                         </div>
                         <h2></h2>
-                        <?php if ( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] ) { ?>
+                        <?php
+                        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                        if ( isset( $_GET['settings-updated'] ) && sanitize_text_field( wp_unslash( $_GET['settings-updated'] ) ) ) { ?>
                             <div class="notice notice-success is-dismissible">
                                 <p><?php esc_html_e( 'Settings updated.', 'wpc-linked-variation' ); ?></p>
                             </div>
@@ -606,11 +622,11 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                         <div class="wpclever_settings_page_nav">
                             <h2 class="nav-tab-wrapper">
                                 <a href="<?php echo esc_url( admin_url( 'admin.php?page=wpclever-wpclv&tab=settings' ) ); ?>"
-                                   class="<?php echo $active_tab === 'settings' ? 'nav-tab nav-tab-active' : 'nav-tab'; ?>">
+                                   class="<?php echo esc_attr( $active_tab === 'settings' ? 'nav-tab nav-tab-active' : 'nav-tab' ); ?>">
                                     <?php esc_html_e( 'Settings', 'wpc-linked-variation' ); ?>
                                 </a>
                                 <a href="<?php echo esc_url( admin_url( 'admin.php?page=wpclever-wpclv&tab=localization' ) ); ?>"
-                                   class="<?php echo $active_tab === 'localization' ? 'nav-tab nav-tab-active' : 'nav-tab'; ?>">
+                                   class="<?php echo esc_attr( $active_tab === 'localization' ? 'nav-tab nav-tab-active' : 'nav-tab' ); ?>">
                                     <?php esc_html_e( 'Localization', 'wpc-linked-variation' ); ?>
                                 </a>
                                 <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=wpclv' ) ); ?>"
@@ -618,7 +634,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                     <?php esc_html_e( 'Linked Variations', 'wpc-linked-variation' ); ?>
                                 </a>
                                 <a href="<?php echo esc_url( admin_url( 'admin.php?page=wpclever-wpclv&tab=premium' ) ); ?>"
-                                   class="<?php echo $active_tab === 'premium' ? 'nav-tab nav-tab-active' : 'nav-tab'; ?>"
+                                   class="<?php echo esc_attr( $active_tab === 'premium' ? 'nav-tab nav-tab-active' : 'nav-tab' ); ?>"
                                    style="color: #c9356e">
                                     <?php esc_html_e( 'Premium Version', 'wpc-linked-variation' ); ?>
                                 </a>
@@ -945,7 +961,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                     $html = '';
                             }
 
-                            echo apply_filters( 'wpclv_term_swatches', $html, $term, $product_id );
+                            echo wp_kses_post( apply_filters( 'wpclv_term_swatches', $html, $term, $product_id ) );
 
                             break;
                         case 'image':
@@ -966,7 +982,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
                             $html .= '</div>';
 
-                            echo apply_filters( 'wpclv_term_image', $html, $term, $product_id );
+                            echo wp_kses_post( apply_filters( 'wpclv_term_image', $html, $term, $product_id ) );
 
                             break;
                         case 'dropdown':
@@ -982,7 +998,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                 }
                             }
 
-                            echo apply_filters( 'wpclv_term_dropdown', $html, $term, $product_id );
+                            echo wp_kses( apply_filters( 'wpclv_term_dropdown', $html, $term, $product_id ), [ 'option' => [ 'value' => [], 'selected' => [], 'disabled' => [] ] ] );
 
                             break;
                         case 'button':
@@ -996,14 +1012,14 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
                             $html .= '</div>';
 
-                            echo apply_filters( 'wpclv_term_button', $html, $term, $product_id );
+                            echo wp_kses_post( apply_filters( 'wpclv_term_button', $html, $term, $product_id ) );
 
                             break;
                     }
                 }
 
                 public static function ajax_load_content() {
-                    if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['nonce'] ), 'wpclv-security' ) ) {
+                    if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['nonce'] ) ), 'wpclv-security' ) ) {
                         die( 'Permissions check failed!' );
                     }
 
@@ -1011,7 +1027,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                         return;
                     }
 
-                    self::render_content( sanitize_text_field( $_POST['id'] ), 0, '', 'ajax' );
+                    self::render_content( sanitize_text_field( wp_unslash( $_POST['id'] ) ), 0, '', 'ajax' );
                     wp_die();
                 }
 
@@ -1147,7 +1163,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                     <div class="wpclv-attribute-label">
                                         <?php
                                         do_action( 'wpclv_attribute_label_before', $attribute );
-                                        echo apply_filters( 'wpclv_attribute_label', esc_html( wc_attribute_label( $attribute->name ) ), $attribute );
+                                        echo wp_kses_post( apply_filters( 'wpclv_attribute_label', esc_html( wc_attribute_label( $attribute->name ) ), $attribute ) );
                                         do_action( 'wpclv_attribute_label_after', $attribute );
                                         ?>
                                     </div>
@@ -1258,7 +1274,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                         }
 
                                         if ( $attribute_limit && ( $attribute_limit < $count ) ) {
-                                            echo '<div class="wpclv-more"><a href="' . esc_url( $_product->get_permalink() ) . '">' . sprintf( apply_filters( 'wpclv_more', self::localization( 'more', /* translators: count */ esc_html__( '+%d More', 'wpc-linked-variation' ) ), ( $count - $attribute_limit ) ), ( $count - $attribute_limit ) ) . '</a></div>';
+                                            echo wp_kses_post( '<div class="wpclv-more"><a href="' . esc_url( $_product->get_permalink() ) . '">' . sprintf( apply_filters( 'wpclv_more', self::localization( 'more', /* translators: count */ esc_html__( '+%d More', 'wpc-linked-variation' ) ), ( $count - $attribute_limit ) ), ( $count - $attribute_limit ) ) . '</a></div>' );
                                         }
 
                                         do_action( 'wpclv_attribute_terms_after', $attribute );
@@ -1284,7 +1300,21 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                         }
                     }
 
-                    echo $link_content;
+                    $allowed_html           = wp_kses_allowed_html( 'post' );
+                    $allowed_html['select'] = [
+                            'class'    => true,
+                            'name'     => true,
+                            'id'       => true,
+                            'multiple' => true,
+                            'data-*'   => true
+                    ];
+                    $allowed_html['option'] = [
+                            'value'    => true,
+                            'selected' => true,
+                            'disabled' => true
+                    ];
+
+                    echo wp_kses( $link_content, $allowed_html );
                 }
 
                 public static function get_linked_products( $link_data, $context = 'default' ) {
@@ -1479,15 +1509,19 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                 }
 
                 function ajax_search_term() {
+                    if ( ! isset( $_REQUEST['security'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['security'] ) ), 'wpclv_nonce' ) ) {
+                        wp_send_json( [] );
+                    }
+
                     $return = [];
 
                     $args = [
-                            'taxonomy'   => sanitize_text_field( $_REQUEST['taxonomy'] ),
+                            'taxonomy'   => isset( $_REQUEST['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['taxonomy'] ) ) : '',
                             'orderby'    => 'id',
                             'order'      => 'ASC',
                             'hide_empty' => false,
                             'fields'     => 'all',
-                            'name__like' => sanitize_text_field( $_REQUEST['q'] ),
+                            'name__like' => isset( $_REQUEST['q'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['q'] ) ) : '',
                     ];
 
                     $terms = get_terms( $args );
