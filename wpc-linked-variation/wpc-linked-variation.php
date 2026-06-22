@@ -3,23 +3,23 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.4.1
+Version: 4.4.2
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
 Domain Path: /languages/
 Requires Plugins: woocommerce
-Requires at least: 4.0
-Tested up to: 6.9
+Requires at least: 5.9
+Tested up to: 7.0
 WC requires at least: 3.0
-WC tested up to: 10.7
+WC tested up to: 10.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.4.1' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.4.2' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -154,8 +154,6 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                 }
 
                 function init() {
-                    // load text-domain
-                    load_plugin_textdomain( 'wpc-linked-variation', false, basename( WPCLV_DIR ) . '/languages/' );
 
                     // shortcode
                     add_shortcode( 'wpclv', [ $this, 'shortcode' ] );
