@@ -3,7 +3,7 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.4.2
+Version: 4.4.3
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
@@ -12,14 +12,14 @@ Requires Plugins: woocommerce
 Requires at least: 5.9
 Tested up to: 7.0
 WC requires at least: 3.0
-WC tested up to: 10.8
+WC tested up to: 10.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.4.2' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.4.3' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -430,7 +430,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
                     if ( isset( $_POST['wpclv_link'] ) ) {
                         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-                        update_post_meta( $post_id, 'wpclv_link', self::sanitize_array( wp_unslash( $_POST['wpclv_link'] ) ) );
+                        update_post_meta( $post_id, 'wpclv_link', self::sanitize_array( wp_unslash( $_POST['wpclv_link'] ?? '' ) ) );
                     }
                 }
 
@@ -585,7 +585,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                 function admin_menu_content() {
                     add_thickbox();
                     // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-                    $active_tab = sanitize_key( $_GET['tab'] ?? 'settings' );
+                    $active_tab = sanitize_key( wp_unslash( $_GET['tab'] ?? 'settings' ) );
                     ?>
                     <div class="wpclever_settings_page wrap">
                         <div class="wpclever_settings_page_header">
@@ -1025,7 +1025,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                         return;
                     }
 
-                    self::render_content( sanitize_text_field( wp_unslash( $_POST['id'] ) ), 0, '', 'ajax' );
+                    self::render_content( sanitize_text_field( wp_unslash( $_POST['id'] ?? '' ) ), 0, '', 'ajax' );
                     wp_die();
                 }
 
@@ -1514,12 +1514,12 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                     $return = [];
 
                     $args = [
-                            'taxonomy'   => isset( $_REQUEST['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['taxonomy'] ) ) : '',
+                            'taxonomy'   => isset( $_REQUEST['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['taxonomy'] ?? '' ) ) : '',
                             'orderby'    => 'id',
                             'order'      => 'ASC',
                             'hide_empty' => false,
                             'fields'     => 'all',
-                            'name__like' => isset( $_REQUEST['q'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['q'] ) ) : '',
+                            'name__like' => isset( $_REQUEST['q'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['q'] ?? '' ) ) : '',
                     ];
 
                     $terms = get_terms( $args );
