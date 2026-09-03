@@ -3,28 +3,28 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.4.4
+Version: 4.5.0
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
 Domain Path: /languages/
 Requires Plugins: woocommerce
 Requires at least: 5.9
-Tested up to: 7.0
+Tested up to: 7.1
 WC requires at least: 3.0
-WC tested up to: 10.9
+WC tested up to: 11.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 defined('ABSPATH') || exit;
 
-!defined('WPCLV_VERSION') && define('WPCLV_VERSION', '4.4.4');
+!defined('WPCLV_VERSION') && define('WPCLV_VERSION', '4.5.0');
 !defined('WPCLV_LITE') && define('WPCLV_LITE', __FILE__);
 !defined('WPCLV_FILE') && define('WPCLV_FILE', __FILE__);
 !defined('WPCLV_URI') && define('WPCLV_URI', plugin_dir_url(__FILE__));
 !defined('WPCLV_DIR') && define('WPCLV_DIR', plugin_dir_path(__FILE__));
-!defined('WPCLV_SUPPORT') && define('WPCLV_SUPPORT', 'https://wpclever.net/support?utm_source=support&utm_medium=wpclv&utm_campaign=wporg');
+!defined('WPCLV_SUPPORT') && define('WPCLV_SUPPORT', 'https://wpclever.net/support/?utm_source=support&utm_medium=wpclv&utm_campaign=wporg');
 !defined('WPCLV_REVIEWS') && define('WPCLV_REVIEWS', 'https://wordpress.org/support/plugin/wpc-linked-variation/reviews/');
 !defined('WPCLV_CHANGELOG') && define('WPCLV_CHANGELOG', 'https://wordpress.org/plugins/wpc-linked-variation/#developers');
 !defined('WPCLV_DISCUSSION') && define('WPCLV_DISCUSSION', 'https://wordpress.org/support/plugin/wpc-linked-variation');
@@ -297,15 +297,16 @@ if (!function_exists('wpclv_init')) {
                                 <?php esc_html_e('Products', 'wpc-linked-variation'); ?>
                             </div>
                             <div class="wpclv_td wpclv_link_td">
+                                <?php
+                                $_product_ids = self::get_link_product_ids($link_products);
+                                ?>
                                 <input class="wpclv-products" type="hidden" name="wpclv_link[products]"
-                                    value="<?php echo esc_attr($link_products); ?>" />
+                                    value="<?php echo esc_attr(implode(',', $_product_ids)); ?>" />
                                 <label>
                                     <select class="wc-product-search wpclv-product-search" multiple="multiple"
                                         data-placeholder="<?php esc_attr_e('Search for a product&hellip;', 'wpc-linked-variation'); ?>"
                                         data-action="woocommerce_json_search_products">
                                         <?php
-                                        $_product_ids = explode(',', $link_products);
-
                                         foreach ($_product_ids as $_product_id) {
                                             $_product = wc_get_product($_product_id);
 
@@ -455,7 +456,66 @@ if (!function_exists('wpclv_init')) {
 
                     if (isset($_POST['wpclv_link'])) {
                         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-                        update_post_meta($post_id, 'wpclv_link', self::sanitize_array(wp_unslash($_POST['wpclv_link'] ?? '')));
+                        $link = self::sanitize_array(wp_unslash($_POST['wpclv_link'] ?? ''));
+                        $link_source = $link['source'] ?? 'products';
+
+                        if ($link_source === 'products') {
+                            $products_data = [];
+                            $raw_products = $link['products'] ?? '';
+
+                            if (is_array($raw_products)) {
+                                foreach ($raw_products as $item) {
+                                    if (is_object($item)) {
+                                        $item = (array) $item;
+                                    }
+
+                                    if (is_array($item)) {
+                                        $pid = absint($item['id'] ?? 0);
+                                        $sku = isset($item['sku']) ? trim((string) $item['sku']) : '';
+
+                                        if (($pid > 0) && ($sku === '')) {
+                                            $product = wc_get_product($pid);
+                                            $sku = $product ? (string) $product->get_sku() : '';
+                                        }
+
+                                        if (($pid > 0) || ($sku !== '')) {
+                                            $products_data[] = [
+                                                'id'  => $pid,
+                                                'sku' => $sku,
+                                            ];
+                                        }
+                                    } else {
+                                        $pid = absint($item);
+
+                                        if ($pid > 0) {
+                                            $product = wc_get_product($pid);
+                                            $products_data[] = [
+                                                'id'  => $pid,
+                                                'sku' => $product ? (string) $product->get_sku() : '',
+                                            ];
+                                        }
+                                    }
+                                }
+                            } elseif (is_string($raw_products) && ($raw_products !== '')) {
+                                $ids = array_filter(array_map('trim', explode(',', $raw_products)));
+
+                                foreach ($ids as $id) {
+                                    $pid = absint($id);
+
+                                    if ($pid > 0) {
+                                        $product = wc_get_product($pid);
+                                        $products_data[] = [
+                                            'id'  => $pid,
+                                            'sku' => $product ? (string) $product->get_sku() : '',
+                                        ];
+                                    }
+                                }
+                            }
+
+                            $link['products'] = $products_data;
+                        }
+
+                        update_post_meta($post_id, 'wpclv_link', $link);
                     }
                 }
 
@@ -496,7 +556,7 @@ if (!function_exists('wpclv_init')) {
                                         $names = [];
 
                                         if (!empty($info['products'])) {
-                                            $products = explode(',', $info['products']);
+                                            $products = self::get_link_product_ids($info['products']);
 
                                             foreach ($products as $pid) {
                                                 if ($name = get_the_title($pid)) {
@@ -1412,7 +1472,7 @@ if (!function_exists('wpclv_init')) {
                         $link_source = $link_data['source'] ?? 'products';
 
                         if (($link_source === 'products') && !empty($link_data['products'])) {
-                            $link_products = explode(',', $link_data['products']);
+                            $link_products = self::get_link_product_ids($link_data['products']);
                         }
 
                         // exclude hidden or unpurchasable
@@ -1462,7 +1522,7 @@ if (!function_exists('wpclv_init')) {
                                     $link_source = $link['source'] ?? 'products';
 
                                     if (($link_source === 'products') && !empty($link['products'])) {
-                                        $product_ids = explode(',', $link['products']);
+                                        $product_ids = self::get_link_product_ids($link['products']);
 
                                         if (in_array($product_id, $product_ids)) {
                                             $linked_data = $link;
@@ -1562,6 +1622,60 @@ if (!function_exists('wpclv_init')) {
                     }
 
                     return false;
+                }
+
+                // resolve product ids from link products data (supports array of id/sku and legacy comma-separated string)
+                public static function get_link_product_ids($products)
+                {
+                    $product_ids = [];
+
+                    if (empty($products)) {
+                        return $product_ids;
+                    }
+
+                    if (is_string($products)) {
+                        $ids = array_filter(array_map('trim', explode(',', $products)));
+
+                        foreach ($ids as $id) {
+                            $pid = absint($id);
+
+                            if ($pid > 0) {
+                                $product_ids[] = $pid;
+                            }
+                        }
+                    } elseif (is_array($products)) {
+                        foreach ($products as $item) {
+                            if (is_object($item)) {
+                                $item = (array) $item;
+                            }
+
+                            $product_id = 0;
+
+                            if (is_array($item)) {
+                                $sku = isset($item['sku']) ? trim((string) $item['sku']) : '';
+
+                                if (($sku !== '') && function_exists('wc_get_product_id_by_sku')) {
+                                    $sku_product_id = wc_get_product_id_by_sku($sku);
+
+                                    if ($sku_product_id > 0) {
+                                        $product_id = $sku_product_id;
+                                    }
+                                }
+
+                                if (!$product_id && !empty($item['id'])) {
+                                    $product_id = absint($item['id']);
+                                }
+                            } else {
+                                $product_id = absint($item);
+                            }
+
+                            if ($product_id > 0) {
+                                $product_ids[] = $product_id;
+                            }
+                        }
+                    }
+
+                    return array_values(array_unique($product_ids));
                 }
 
                 function action_links($links, $file)
