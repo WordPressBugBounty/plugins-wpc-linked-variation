@@ -3,8 +3,7 @@ Contributors: wpclever
 Donate link: https://wpclever.net
 Tags: woocommerce, wpc, linked variations, variation
 Tested up to: 7.1
-Version: 4.5.0
-Stable tag: 4.5.0
+Stable tag: 4.5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -83,6 +82,9 @@ Good luck and enjoy our plugin.
 4. Go to WP-admin > WPClever > Linked Variation to add linked variations
 
 == Changelog ==
+
+= 4.5.1 =
+* Fixed: Compatibility issue with identical SKUs when 'wc_product_has_unique_sku' filter is false
 
 = 4.5.0 =
 * Updated: Save both the product ID and SKU to facilitate easy export and import

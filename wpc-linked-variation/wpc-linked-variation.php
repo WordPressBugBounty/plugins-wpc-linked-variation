@@ -3,23 +3,22 @@
 Plugin Name: WPC Linked Variation for WooCommerce
 Plugin URI: https://wpclever.net/
 Description: WPC Linked Variation built to link separate products together by attributes.
-Version: 4.5.0
 Author: WPClever
 Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
 Domain Path: /languages/
 Requires Plugins: woocommerce
+Version: 4.5.1
 Requires at least: 5.9
-Tested up to: 7.1
 WC requires at least: 3.0
-WC tested up to: 11.0
+WC tested up to: 11.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 defined('ABSPATH') || exit;
 
-!defined('WPCLV_VERSION') && define('WPCLV_VERSION', '4.5.0');
+!defined('WPCLV_VERSION') && define('WPCLV_VERSION', '4.5.1');
 !defined('WPCLV_LITE') && define('WPCLV_LITE', __FILE__);
 !defined('WPCLV_FILE') && define('WPCLV_FILE', __FILE__);
 !defined('WPCLV_URI') && define('WPCLV_URI', plugin_dir_url(__FILE__));
@@ -1652,18 +1651,35 @@ if (!function_exists('wpclv_init')) {
                             $product_id = 0;
 
                             if (is_array($item)) {
+                                $id  = !empty($item['id']) ? absint($item['id']) : 0;
                                 $sku = isset($item['sku']) ? trim((string) $item['sku']) : '';
 
-                                if (($sku !== '') && function_exists('wc_get_product_id_by_sku')) {
-                                    $sku_product_id = wc_get_product_id_by_sku($sku);
+                                if (apply_filters('wc_product_has_unique_sku', true, 0)) {
+                                    // SKU is unique: prioritize SKU for better import/export compatibility
+                                    if (($sku !== '') && function_exists('wc_get_product_id_by_sku')) {
+                                        $sku_product_id = wc_get_product_id_by_sku($sku);
 
-                                    if ($sku_product_id > 0) {
-                                        $product_id = $sku_product_id;
+                                        if ($sku_product_id > 0) {
+                                            $product_id = $sku_product_id;
+                                        }
                                     }
-                                }
 
-                                if (!$product_id && !empty($item['id'])) {
-                                    $product_id = absint($item['id']);
+                                    if (!$product_id && ($id > 0)) {
+                                        $product_id = $id;
+                                    }
+                                } else {
+                                    // SKU is NOT unique: prioritize ID because SKU lookup is ambiguous
+                                    if ($id > 0) {
+                                        $product_id = $id;
+                                    }
+
+                                    if (!$product_id && ($sku !== '') && function_exists('wc_get_product_id_by_sku')) {
+                                        $sku_product_id = wc_get_product_id_by_sku($sku);
+
+                                        if ($sku_product_id > 0) {
+                                            $product_id = $sku_product_id;
+                                        }
+                                    }
                                 }
                             } else {
                                 $product_id = absint($item);
