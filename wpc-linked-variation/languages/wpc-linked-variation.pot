@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPC Linked Variation for WooCommerce 4.5.1\n"
+"Project-Id-Version: WPC Linked Variation for WooCommerce 4.5.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wpc-linked-variation\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-23T10:26:18+00:00\n"
+"POT-Creation-Date: 2026-10-06T02:24:43+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wpc-linked-variation\n"
@@ -39,429 +39,429 @@ msgstr ""
 msgid "https://wpclever.net"
 msgstr ""
 
-#: wpc-linked-variation.php:170
+#: wpc-linked-variation.php:162
 msgctxt "Post Type General Name"
 msgid "Linked Variations"
 msgstr ""
 
-#: wpc-linked-variation.php:171
+#: wpc-linked-variation.php:163
 msgctxt "Post Type Singular Name"
 msgid "Linked Variation"
 msgstr ""
 
-#: wpc-linked-variation.php:172
+#: wpc-linked-variation.php:164
 msgid "Add New Linked Variation"
 msgstr ""
 
-#: wpc-linked-variation.php:173
+#: wpc-linked-variation.php:165
 msgid "Add New"
 msgstr ""
 
-#: wpc-linked-variation.php:174
+#: wpc-linked-variation.php:166
 msgid "Edit Linked Variation"
 msgstr ""
 
-#: wpc-linked-variation.php:175
+#: wpc-linked-variation.php:167
 msgid "Update Linked Variation"
 msgstr ""
 
-#: wpc-linked-variation.php:176
+#: wpc-linked-variation.php:168
 msgid "Search Linked Variation"
 msgstr ""
 
-#: wpc-linked-variation.php:180
-#: wpc-linked-variation.php:684
+#: wpc-linked-variation.php:172
+#: wpc-linked-variation.php:667
 msgid "Linked Variation"
 msgstr ""
 
-#: wpc-linked-variation.php:233
-#: wpc-linked-variation.php:539
+#: wpc-linked-variation.php:223
+#: wpc-linked-variation.php:528
 msgid "Configuration"
 msgstr ""
 
-#: wpc-linked-variation.php:279
+#: wpc-linked-variation.php:267
 msgid "Source"
 msgstr ""
 
-#: wpc-linked-variation.php:283
-#: wpc-linked-variation.php:296
-#: wpc-linked-variation.php:554
+#: wpc-linked-variation.php:271
+#: wpc-linked-variation.php:284
+#: wpc-linked-variation.php:542
 msgid "Products"
 msgstr ""
 
-#: wpc-linked-variation.php:306
+#: wpc-linked-variation.php:294
 msgid "Search for a product&hellip;"
 msgstr ""
 
-#: wpc-linked-variation.php:322
+#: wpc-linked-variation.php:310
 msgid "Terms"
 msgstr ""
 
-#: wpc-linked-variation.php:326
+#: wpc-linked-variation.php:316
 msgid "All (any)"
 msgstr ""
 
-#: wpc-linked-variation.php:327
+#: wpc-linked-variation.php:317
 msgid "or"
 msgstr ""
 
-#: wpc-linked-variation.php:354
-#: wpc-linked-variation.php:810
+#: wpc-linked-variation.php:346
+#: wpc-linked-variation.php:794
 msgid "Limit"
 msgstr ""
 
-#: wpc-linked-variation.php:365
+#: wpc-linked-variation.php:357
 msgid "Orderby"
 msgstr ""
 
-#: wpc-linked-variation.php:370
-#: wpc-linked-variation.php:397
+#: wpc-linked-variation.php:362
+#: wpc-linked-variation.php:389
 msgid "Default"
 msgstr ""
 
-#: wpc-linked-variation.php:372
+#: wpc-linked-variation.php:364
 msgid "None"
 msgstr ""
 
-#: wpc-linked-variation.php:374
+#: wpc-linked-variation.php:366
 msgid "ID"
 msgstr ""
 
-#: wpc-linked-variation.php:376
+#: wpc-linked-variation.php:368
 msgid "Name"
 msgstr ""
 
-#: wpc-linked-variation.php:378
+#: wpc-linked-variation.php:370
 msgid "Type"
 msgstr ""
 
-#: wpc-linked-variation.php:380
+#: wpc-linked-variation.php:372
 msgid "Rand"
 msgstr ""
 
-#: wpc-linked-variation.php:382
-#: wpc-linked-variation.php:540
+#: wpc-linked-variation.php:374
+#: wpc-linked-variation.php:529
 msgid "Date"
 msgstr ""
 
-#: wpc-linked-variation.php:384
+#: wpc-linked-variation.php:376
 msgid "Price"
 msgstr ""
 
-#: wpc-linked-variation.php:386
+#: wpc-linked-variation.php:378
 msgid "Modified"
 msgstr ""
 
-#: wpc-linked-variation.php:392
+#: wpc-linked-variation.php:384
 msgid "Order"
 msgstr ""
 
-#: wpc-linked-variation.php:399
+#: wpc-linked-variation.php:391
 msgid "DESC"
 msgstr ""
 
-#: wpc-linked-variation.php:401
+#: wpc-linked-variation.php:393
 msgid "ASC"
 msgstr ""
 
-#: wpc-linked-variation.php:406
+#: wpc-linked-variation.php:398
 msgid "Linked by (attributes)"
 msgstr ""
 
-#: wpc-linked-variation.php:424
+#: wpc-linked-variation.php:416
 msgid "Move"
 msgstr ""
 
-#: wpc-linked-variation.php:424
+#: wpc-linked-variation.php:416
 msgid "Show images"
 msgstr ""
 
-#: wpc-linked-variation.php:424
+#: wpc-linked-variation.php:416
 msgid "Use dropdown"
 msgstr ""
 
-#: wpc-linked-variation.php:424
+#: wpc-linked-variation.php:416
 msgid "Use swatches"
 msgstr ""
 
-#: wpc-linked-variation.php:538
+#: wpc-linked-variation.php:527
 msgid "Title"
 msgstr ""
 
-#: wpc-linked-variation.php:571
+#: wpc-linked-variation.php:559
 msgid "Categories"
 msgstr ""
 
-#: wpc-linked-variation.php:575
+#: wpc-linked-variation.php:563
 msgid "Tags"
 msgstr ""
 
-#: wpc-linked-variation.php:590
+#: wpc-linked-variation.php:578
 msgid "Attributes"
 msgstr ""
 
+#: wpc-linked-variation.php:667
 #: wpc-linked-variation.php:684
-#: wpc-linked-variation.php:702
 msgid "WPC Linked Variation"
 msgstr ""
 
-#: wpc-linked-variation.php:702
+#: wpc-linked-variation.php:684
 msgid "Premium"
 msgstr ""
 
 #. translators: stars
-#: wpc-linked-variation.php:706
+#: wpc-linked-variation.php:688
 #, php-format
 msgid "Thank you for using our plugin! If you are satisfied, please reward it a full five-star %s rating."
 msgstr ""
 
-#: wpc-linked-variation.php:709
+#: wpc-linked-variation.php:691
 msgid "Reviews"
 msgstr ""
 
-#: wpc-linked-variation.php:712
+#: wpc-linked-variation.php:694
 msgid "Changelog"
 msgstr ""
 
-#: wpc-linked-variation.php:715
+#: wpc-linked-variation.php:697
 msgid "Discussion"
 msgstr ""
 
-#: wpc-linked-variation.php:725
+#: wpc-linked-variation.php:707
 msgid "Settings updated."
 msgstr ""
 
-#: wpc-linked-variation.php:732
-#: wpc-linked-variation.php:1706
+#: wpc-linked-variation.php:714
+#: wpc-linked-variation.php:1689
 msgid "Settings"
 msgstr ""
 
-#: wpc-linked-variation.php:736
+#: wpc-linked-variation.php:718
 msgid "Localization"
 msgstr ""
 
-#: wpc-linked-variation.php:739
-#: wpc-linked-variation.php:1707
+#: wpc-linked-variation.php:722
+#: wpc-linked-variation.php:1690
 msgid "Linked Variations"
 msgstr ""
 
-#: wpc-linked-variation.php:744
-#: wpc-linked-variation.php:1708
+#: wpc-linked-variation.php:727
+#: wpc-linked-variation.php:1691
 msgid "Premium Version"
 msgstr ""
 
-#: wpc-linked-variation.php:747
+#: wpc-linked-variation.php:731
 msgid "Essential Kit"
 msgstr ""
 
-#: wpc-linked-variation.php:768
+#: wpc-linked-variation.php:752
 msgid "Position on single page"
 msgstr ""
 
-#: wpc-linked-variation.php:772
-#: wpc-linked-variation.php:795
+#: wpc-linked-variation.php:756
+#: wpc-linked-variation.php:779
 msgid "Above the add to cart button"
 msgstr ""
 
-#: wpc-linked-variation.php:775
-#: wpc-linked-variation.php:798
+#: wpc-linked-variation.php:759
+#: wpc-linked-variation.php:782
 msgid "Under the add to cart button"
 msgstr ""
 
-#: wpc-linked-variation.php:778
-#: wpc-linked-variation.php:801
+#: wpc-linked-variation.php:762
+#: wpc-linked-variation.php:785
 msgid "Under the title"
 msgstr ""
 
-#: wpc-linked-variation.php:780
-#: wpc-linked-variation.php:803
+#: wpc-linked-variation.php:764
+#: wpc-linked-variation.php:787
 msgid "Under the price"
 msgstr ""
 
-#: wpc-linked-variation.php:782
+#: wpc-linked-variation.php:766
 msgid "Under the excerpt"
 msgstr ""
 
-#: wpc-linked-variation.php:784
-#: wpc-linked-variation.php:805
+#: wpc-linked-variation.php:768
+#: wpc-linked-variation.php:789
 msgid "None (hide it)"
 msgstr ""
 
-#: wpc-linked-variation.php:787
+#: wpc-linked-variation.php:771
 msgid "Choose the position to show the linked variations on single product page."
 msgstr ""
 
-#: wpc-linked-variation.php:791
+#: wpc-linked-variation.php:775
 msgid "Position on archive page"
 msgstr ""
 
-#: wpc-linked-variation.php:808
+#: wpc-linked-variation.php:792
 msgid "Choose the position to show the linked variations on archive page."
 msgstr ""
 
-#: wpc-linked-variation.php:819
+#: wpc-linked-variation.php:804
 msgid "Shortcode"
 msgstr ""
 
 #. translators: shortcode
-#: wpc-linked-variation.php:821
+#: wpc-linked-variation.php:806
 #, php-format
 msgid "You can use the shortcode %s to show the list where you want."
 msgstr ""
 
-#: wpc-linked-variation.php:825
+#: wpc-linked-variation.php:810
 msgid "Tooltip library"
 msgstr ""
 
-#: wpc-linked-variation.php:829
+#: wpc-linked-variation.php:814
 msgid "Hint.css"
 msgstr ""
 
-#: wpc-linked-variation.php:831
+#: wpc-linked-variation.php:816
 msgid "Tippy.js"
 msgstr ""
 
-#: wpc-linked-variation.php:833
+#: wpc-linked-variation.php:818
 msgid "None (Disable)"
 msgstr ""
 
-#: wpc-linked-variation.php:843
+#: wpc-linked-variation.php:829
 msgid "Tooltip position"
 msgstr ""
 
-#: wpc-linked-variation.php:847
+#: wpc-linked-variation.php:833
 msgid "Top"
 msgstr ""
 
-#: wpc-linked-variation.php:849
+#: wpc-linked-variation.php:835
 msgid "Right"
 msgstr ""
 
-#: wpc-linked-variation.php:851
+#: wpc-linked-variation.php:837
 msgid "Bottom"
 msgstr ""
 
-#: wpc-linked-variation.php:853
+#: wpc-linked-variation.php:839
 msgid "Left"
 msgstr ""
 
-#: wpc-linked-variation.php:859
+#: wpc-linked-variation.php:845
 msgid "Tooltip content"
 msgstr ""
 
-#: wpc-linked-variation.php:863
+#: wpc-linked-variation.php:849
 msgid "Attribute information"
 msgstr ""
 
-#: wpc-linked-variation.php:865
+#: wpc-linked-variation.php:851
 msgid "Product information"
 msgstr ""
 
-#: wpc-linked-variation.php:870
+#: wpc-linked-variation.php:856
 msgid "Hide empty attribute terms"
 msgstr ""
 
-#: wpc-linked-variation.php:874
-#: wpc-linked-variation.php:887
-#: wpc-linked-variation.php:898
-#: wpc-linked-variation.php:926
+#: wpc-linked-variation.php:860
+#: wpc-linked-variation.php:873
+#: wpc-linked-variation.php:884
+#: wpc-linked-variation.php:912
 msgid "Yes"
 msgstr ""
 
-#: wpc-linked-variation.php:876
-#: wpc-linked-variation.php:889
-#: wpc-linked-variation.php:900
-#: wpc-linked-variation.php:928
+#: wpc-linked-variation.php:862
+#: wpc-linked-variation.php:875
+#: wpc-linked-variation.php:886
+#: wpc-linked-variation.php:914
 msgid "No"
 msgstr ""
 
-#: wpc-linked-variation.php:879
+#: wpc-linked-variation.php:865
 msgid "Hide attribute terms that haven't any products."
 msgstr ""
 
-#: wpc-linked-variation.php:883
+#: wpc-linked-variation.php:869
 msgid "Exclude hidden product"
 msgstr ""
 
-#: wpc-linked-variation.php:894
+#: wpc-linked-variation.php:880
 msgid "Exclude unpurchasable product"
 msgstr ""
 
-#: wpc-linked-variation.php:905
+#: wpc-linked-variation.php:891
 msgid "Link to individual product"
 msgstr ""
 
-#: wpc-linked-variation.php:909
+#: wpc-linked-variation.php:895
 msgid "Open in the same tab"
 msgstr ""
 
-#: wpc-linked-variation.php:911
+#: wpc-linked-variation.php:897
 msgid "Open in the new tab"
 msgstr ""
 
-#: wpc-linked-variation.php:913
+#: wpc-linked-variation.php:899
 msgid "Open quick view popup"
 msgstr ""
 
-#: wpc-linked-variation.php:922
+#: wpc-linked-variation.php:908
 msgid "Use nofollow links"
 msgstr ""
 
-#: wpc-linked-variation.php:945
+#: wpc-linked-variation.php:932
 msgid "import / export"
 msgstr ""
 
-#: wpc-linked-variation.php:954
+#: wpc-linked-variation.php:941
 msgid "General"
 msgstr ""
 
-#: wpc-linked-variation.php:956
+#: wpc-linked-variation.php:943
 msgid "Leave blank to use the default text and its equivalent translation in multiple languages."
 msgstr ""
 
-#: wpc-linked-variation.php:960
+#: wpc-linked-variation.php:947
 msgid "More"
 msgstr ""
 
 #. translators: count
-#: wpc-linked-variation.php:965
-#: wpc-linked-variation.php:1422
+#: wpc-linked-variation.php:954
+#: wpc-linked-variation.php:1412
 #, php-format
 msgid "+%d More"
 msgstr ""
 
-#: wpc-linked-variation.php:1725
+#: wpc-linked-variation.php:1707
 msgid "Community support"
 msgstr ""
 
-#: wpc-linked-variation.php:1765
+#: wpc-linked-variation.php:1745
 msgid "Before container"
 msgstr ""
 
-#: wpc-linked-variation.php:1766
+#: wpc-linked-variation.php:1746
 msgid "After container"
 msgstr ""
 
-#: wpc-linked-variation.php:1767
+#: wpc-linked-variation.php:1747
 msgid "Before attributes"
 msgstr ""
 
-#: wpc-linked-variation.php:1768
+#: wpc-linked-variation.php:1748
 msgid "After attributes"
 msgstr ""
 
-#: wpc-linked-variation.php:1769
+#: wpc-linked-variation.php:1749
 msgid "Before attribute"
 msgstr ""
 
-#: wpc-linked-variation.php:1770
+#: wpc-linked-variation.php:1750
 msgid "After attribute"
 msgstr ""
 
-#: wpc-linked-variation.php:1771
+#: wpc-linked-variation.php:1751
 msgid "Before attribute label"
 msgstr ""
 
-#: wpc-linked-variation.php:1772
+#: wpc-linked-variation.php:1752
 msgid "After attribute label"
 msgstr ""
