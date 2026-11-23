@@ -8,17 +8,17 @@ Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
 Domain Path: /languages/
 Requires Plugins: woocommerce
-Version: 4.5.2
+Version: 4.6.0
 Requires at least: 5.9
 WC requires at least: 3.0
-WC tested up to: 11.1
+WC tested up to: 11.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.5.2' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.6.0' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -124,6 +124,86 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
                     // WPC Smart Messages
                     add_filter( 'wpcsm_locations', [ $this, 'wpcsm_locations' ] );
+
+                    // cache invalidation
+                    add_action( 'save_post', [ $this, 'maybe_flush_cache_by_post' ], 99 );
+                    add_action( 'trashed_post', [ $this, 'maybe_flush_cache_by_post' ] );
+                    add_action( 'untrashed_post', [ $this, 'maybe_flush_cache_by_post' ] );
+                    add_action( 'before_delete_post', [ $this, 'maybe_flush_cache_by_post' ] );
+                    add_action( 'woocommerce_product_set_stock_status', [ $this, 'maybe_flush_cache_by_post' ] );
+                    add_action( 'woocommerce_variation_set_stock_status', [ $this, 'maybe_flush_cache_by_post' ] );
+                    add_action( 'created_term', [ $this, 'maybe_flush_cache_by_term' ], 10, 3 );
+                    add_action( 'edited_term', [ $this, 'maybe_flush_cache_by_term' ], 10, 3 );
+                    add_action( 'delete_term', [ $this, 'maybe_flush_cache_by_term' ], 10, 3 );
+                    add_action( 'woocommerce_attribute_added', [ $this, 'flush_cache' ] );
+                    add_action( 'woocommerce_attribute_updated', [ $this, 'flush_cache' ] );
+                    add_action( 'woocommerce_attribute_deleted', [ $this, 'flush_cache' ] );
+                    add_action( 'update_option_wpclv_settings', [ $this, 'flush_cache' ] );
+                    add_action( 'update_option_wpclv_localization', [ $this, 'flush_cache' ] );
+                    add_action( 'admin_post_wpclv_clear_cache', [ $this, 'clear_cache_action' ] );
+                }
+
+                // handle the "Clear cache" button on the settings page
+                public static function clear_cache_action() {
+                    if ( ! current_user_can( 'manage_options' ) || ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'wpclv_clear_cache' ) ) {
+                        wp_die( esc_html__( 'Permissions check failed!', 'wpc-linked-variation' ) );
+                    }
+
+                    // bump the version immediately so the cache is cleared before the redirect
+                    update_option( 'wpclv_cache_version', (string) round( microtime( true ) * 1000 ), true );
+
+                    wp_safe_redirect( add_query_arg( 'wpclv-cache-cleared', '1', admin_url( 'admin.php?page=wpclever-wpclv&tab=settings' ) ) );
+                    exit;
+                }
+
+                // cache version is part of every transient key, bumping it invalidates all cached data at once
+                public static function get_cache_version() {
+                    static $version = null;
+
+                    if ( $version === null ) {
+                        $version = (string) get_option( 'wpclv_cache_version', '1' );
+                    }
+
+                    return $version;
+                }
+
+                public static function cache_key( $name ) {
+                    return 'wpclv_' . $name . '_v' . self::get_cache_version();
+                }
+
+                // schedule a single version bump at the end of the request (avoid many writes on bulk updates)
+                public static function flush_cache() {
+                    static $scheduled = false;
+
+                    if ( $scheduled ) {
+                        return;
+                    }
+
+                    $scheduled = true;
+
+                    add_action( 'shutdown', function () {
+                        update_option( 'wpclv_cache_version', (string) round( microtime( true ) * 1000 ), true );
+                    } );
+                }
+
+                public static function maybe_flush_cache_by_post( $post_id ) {
+                    $post_id = absint( $post_id );
+
+                    if ( ! $post_id || wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
+                        return;
+                    }
+
+                    if ( in_array( get_post_type( $post_id ), [ 'wpclv', 'product', 'product_variation' ], true ) ) {
+                        self::flush_cache();
+                    }
+                }
+
+                public static function maybe_flush_cache_by_term( $term_id, $tt_id = 0, $taxonomy = '' ) {
+                    $taxonomy_object = get_taxonomy( $taxonomy );
+
+                    if ( $taxonomy_object && in_array( 'product', (array) $taxonomy_object->object_type, true ) ) {
+                        self::flush_cache();
+                    }
                 }
 
                 public static function get_settings() {
@@ -706,6 +786,13 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                             <div class="notice notice-success is-dismissible">
                                 <p><?php esc_html_e( 'Settings updated.', 'wpc-linked-variation' ); ?></p>
                             </div>
+                        <?php }
+
+                        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                        if ( isset( $_GET['wpclv-cache-cleared'] ) ) { ?>
+                            <div class="notice notice-success is-dismissible">
+                                <p><?php esc_html_e( 'Cache cleared.', 'wpc-linked-variation' ); ?></p>
+                            </div>
                         <?php } ?>
                         <div class="wpclever_settings_page_nav">
                             <h2 class="nav-tab-wrapper">
@@ -745,6 +832,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                 $exclude_unpurchasable = self::get_setting( 'exclude_unpurchasable', 'no' );
                                 $link                  = self::get_setting( 'link', 'yes' );
                                 $nofollow              = self::get_setting( 'nofollow', 'no' );
+                                $cache                 = self::get_setting( 'cache', 'no' );
                                 ?>
                                 <form method="post" action="options.php">
                                     <table class="form-table">
@@ -913,6 +1001,24 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                                         <option value="no" <?php selected( $nofollow, 'no' ); ?>>
                                                             <?php esc_html_e( 'No', 'wpc-linked-variation' ); ?></option>
                                                     </select> </label>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th><?php esc_html_e( 'Cache', 'wpc-linked-variation' ); ?></th>
+                                            <td>
+                                                <label> <select name="wpclv_settings[cache]">
+                                                        <option value="yes" <?php selected( $cache, 'yes' ); ?>>
+                                                            <?php esc_html_e( 'Enable', 'wpc-linked-variation' ); ?>
+                                                        </option>
+                                                        <option value="no" <?php selected( $cache, 'no' ); ?>>
+                                                            <?php esc_html_e( 'Disable', 'wpc-linked-variation' ); ?>
+                                                        </option>
+                                                    </select> </label>
+                                                <a class="button wpclv-clear-cache"
+                                                   href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=wpclv_clear_cache' ), 'wpclv_clear_cache' ) ); ?>">
+                                                    <?php esc_html_e( 'Clear cache', 'wpc-linked-variation' ); ?>
+                                                </a>
+                                                <p class="description"><?php esc_html_e( 'Cache the linked data, products and rendered content to reduce database queries and server load. The cache is cleared automatically when products, terms, attributes, linked variations or settings are updated.', 'wpc-linked-variation' ); ?></p>
                                             </td>
                                         </tr>
                                         <tr class="submit">
@@ -1222,7 +1328,10 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                         return;
                     }
 
-                    if ( ! self::enable_cache( 'content' ) || ( false === ( $link_content = get_transient( 'wpclv_linked_content_' . $context . '_' . $product_id ) ) ) ) {
+                    // limit and hide change the output, so they are part of the cache key
+                    $content_key = self::cache_key( 'linked_content_' . $context . '_' . $product_id . '_' . md5( $limit . '|' . $hide ) );
+
+                    if ( ! self::enable_cache( 'content' ) || ( false === ( $link_content = get_transient( $content_key ) ) ) ) {
                         $link_data = self::get_linked_data( $_product, $context );
 
                         if ( empty( $link_data ) ) {
@@ -1431,7 +1540,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                         $link_content = ob_get_clean();
 
                         if ( self::enable_cache( 'content' ) ) {
-                            set_transient( 'wpclv_linked_content_' . $context . '_' . $product_id, $link_content, 24 * HOUR_IN_SECONDS );
+                            set_transient( $content_key, $link_content, 24 * HOUR_IN_SECONDS );
                         }
                     }
 
@@ -1453,9 +1562,17 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                 }
 
                 public static function get_linked_products( $link_data, $context = 'default' ) {
-                    $link_id = $link_data['id'] ?? 0;
+                    static $products_cache = [];
 
-                    if ( ! self::enable_cache( 'products' ) || ( false === ( $link_products = get_transient( 'wpclv_linked_products_' . $link_id ) ) ) ) {
+                    $link_id  = $link_data['id'] ?? 0;
+                    $mem_key  = $link_id . '_' . md5( wp_json_encode( $link_data ) );
+
+                    // reuse the result within the same request (e.g. product loops)
+                    if ( isset( $products_cache[ $mem_key ] ) ) {
+                        return apply_filters( 'wpclv_get_linked_products', $products_cache[ $mem_key ], $link_data, $context );
+                    }
+
+                    if ( ! self::enable_cache( 'products' ) || ( false === ( $link_products = get_transient( self::cache_key( 'linked_products_' . $link_id ) ) ) ) ) {
                         $link_products = [];
                         $link_source   = $link_data['source'] ?? 'products';
 
@@ -1465,6 +1582,15 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
                         // exclude hidden or unpurchasable
                         if ( ( self::get_setting( 'exclude_hidden', 'no' ) === 'yes' ) || ( self::get_setting( 'exclude_unpurchasable', 'no' ) === 'yes' ) ) {
+                            // prime post and meta caches in bulk to avoid one query per product
+                            if ( ! empty( $link_products ) ) {
+                                if ( function_exists( '_prime_post_caches' ) ) {
+                                    _prime_post_caches( $link_products, false, true );
+                                } else {
+                                    update_meta_cache( 'post', $link_products );
+                                }
+                            }
+
                             foreach ( $link_products as $key => $link_product_id ) {
                                 $link_product = wc_get_product( $link_product_id );
 
@@ -1475,9 +1601,11 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                         }
 
                         if ( self::enable_cache( 'products' ) ) {
-                            set_transient( 'wpclv_linked_products_' . $link_id, $link_products, 24 * HOUR_IN_SECONDS );
+                            set_transient( self::cache_key( 'linked_products_' . $link_id ), $link_products, 24 * HOUR_IN_SECONDS );
                         }
                     }
+
+                    $products_cache[ $mem_key ] = $link_products;
 
                     return apply_filters( 'wpclv_get_linked_products', $link_products, $link_data, $context );
                 }
@@ -1489,17 +1617,27 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
                     $product_id = $product->get_id();
 
-                    if ( ! self::enable_cache( 'data' ) || ( false === ( $linked_data = get_transient( 'wpclv_linked_data_' . $product_id ) ) ) ) {
+                    if ( ! self::enable_cache( 'data' ) || ( false === ( $linked_data = get_transient( self::cache_key( 'linked_data_' . $product_id ) ) ) ) ) {
+                        static $links_cache = [];
+
                         $linked_data = [];
-                        $links       = get_posts( apply_filters( 'wpclv_get_linked_args', [
+                        $links_args  = apply_filters( 'wpclv_get_linked_args', [
                                 'post_type'              => 'wpclv',
                                 'post_status'            => 'publish',
                                 'posts_per_page'         => 500, // get all linked
                                 'no_found_rows'          => true,
                                 'update_post_term_cache' => false,
-                                'update_post_meta_cache' => false,
+                                'update_post_meta_cache' => true, // prime meta in one query instead of one per link
                                 'fields'                 => 'ids'
-                        ] ) );
+                        ] );
+                        $links_key   = md5( wp_json_encode( $links_args ) );
+
+                        // reuse the links list within the same request (e.g. product loops)
+                        if ( ! isset( $links_cache[ $links_key ] ) ) {
+                            $links_cache[ $links_key ] = get_posts( $links_args );
+                        }
+
+                        $links = $links_cache[ $links_key ];
 
                         if ( ! empty( $links ) ) {
                             foreach ( $links as $link_id ) {
@@ -1562,7 +1700,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                         }
 
                         if ( self::enable_cache( 'data' ) ) {
-                            set_transient( 'wpclv_linked_data_' . $product_id, $linked_data, 24 * HOUR_IN_SECONDS );
+                            set_transient( self::cache_key( 'linked_data_' . $product_id ), $linked_data, 24 * HOUR_IN_SECONDS );
                         }
                     }
 
@@ -1570,7 +1708,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                 }
 
                 public static function enable_cache( $context = 'default' ) {
-                    return apply_filters( 'wpclv_enable_cache', false, $context );
+                    return apply_filters( 'wpclv_enable_cache', self::get_setting( 'cache', 'no' ) === 'yes', $context );
                 }
 
                 public static function enable_ajax( $context = 'default' ) {
@@ -1590,6 +1728,9 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                         return false;
                     }
 
+                    // prime term relationships for all candidate products in one query (avoid N+1 inside has_term)
+                    self::prime_product_terms( $get_products );
+
                     foreach ( $get_products as $product_id ) {
                         $valid = true;
 
@@ -1606,6 +1747,33 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                     }
 
                     return false;
+                }
+
+                // load term relationships of many products with a single query
+                public static function prime_product_terms( $product_ids ) {
+                    static $primed = [];
+
+                    $product_ids = array_values( array_unique( array_filter( array_map( 'absint', (array) $product_ids ) ) ) );
+                    $product_ids = array_values( array_diff( $product_ids, array_keys( $primed ) ) );
+
+                    if ( empty( $product_ids ) ) {
+                        return;
+                    }
+
+                    // skip ids already present in the object cache
+                    $uncached = [];
+
+                    foreach ( $product_ids as $product_id ) {
+                        if ( false === wp_cache_get( $product_id, 'product_cat_relationships' ) ) {
+                            $uncached[] = $product_id;
+                        }
+
+                        $primed[ $product_id ] = true;
+                    }
+
+                    if ( ! empty( $uncached ) ) {
+                        update_object_term_cache( $uncached, 'product' );
+                    }
                 }
 
                 // resolve product ids from link products data (supports array of id/sku and legacy comma-separated string)

@@ -3,7 +3,7 @@ Contributors: wpclever
 Donate link: https://wpclever.net
 Tags: woocommerce, wpc, linked variations, variation
 Tested up to: 7.1
-Stable tag: 4.5.2
+Stable tag: 4.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,6 +82,13 @@ Good luck and enjoy our plugin.
 4. Go to WP-admin > WPClever > Linked Variation to add linked variations
 
 == Changelog ==
+
+= 4.6.0 =
+* Added: Cache option and 'Clear cache' button on the settings page
+* Improved: Fixed N+1 queries in get_linked_product_id() by priming term caches in bulk
+* Improved: Reduced repeated queries for linked data and linked products on archive pages
+* Improved: Automatically clear the cache when products, terms, attributes, linked variations or settings are updated
+* Fixed: Cached content ignored the limit and hide parameters
 
 = 4.5.2 =
 * Fixed: Passes 3 arguments to the filter 'wc_product_has_unique_sku'
