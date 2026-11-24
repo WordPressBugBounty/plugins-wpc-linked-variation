@@ -8,7 +8,7 @@ Author URI: https://wpclever.net
 Text Domain: wpc-linked-variation
 Domain Path: /languages/
 Requires Plugins: woocommerce
-Version: 4.6.0
+Version: 4.6.1
 Requires at least: 5.9
 WC requires at least: 3.0
 WC tested up to: 11.3
@@ -18,7 +18,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 defined( 'ABSPATH' ) || exit;
 
-! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.6.0' );
+! defined( 'WPCLV_VERSION' ) && define( 'WPCLV_VERSION', '4.6.1' );
 ! defined( 'WPCLV_LITE' ) && define( 'WPCLV_LITE', __FILE__ );
 ! defined( 'WPCLV_FILE' ) && define( 'WPCLV_FILE', __FILE__ );
 ! defined( 'WPCLV_URI' ) && define( 'WPCLV_URI', plugin_dir_url( __FILE__ ) );
@@ -265,6 +265,8 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                             'exclude_from_search' => true,
                             'publicly_queryable'  => false,
                             'capability_type'     => 'post',
+                            'map_meta_cap'        => true,
+                            'capabilities'        => self::get_post_type_capabilities(),
                             'show_in_rest'        => false,
                     ];
 
@@ -328,7 +330,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                     $link_attributes = $link['attributes'] ?? [];
                     $link_images     = $link['images'] ?? [];
                     $link_swatches   = $link['swatches'] ?? [];
-                    $link_source     = $link['source'] ?? 'products';
+                    $link_source     = self::sanitize_source( $link['source'] ?? 'products' );
                     $link_products   = $link['products'] ?? '';
                     $link_terms      = $link['terms'] ?? '';
                     $link_limit      = $link['limit'] ?? 500;
@@ -406,7 +408,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                                     ?>
                                     <label>
                                         <select class="wpclv-terms-select" multiple="multiple"
-                                                data-<?php echo esc_attr( $link_source ); ?>="<?php echo esc_attr( implode( ',', $link_terms ) ); ?>">
+                                                data-<?php echo esc_attr( sanitize_key( $link_source ) ); ?>="<?php echo esc_attr( implode( ',', $link_terms ) ); ?>">
                                             <?php
                                             if ( ! empty( $link_terms ) ) {
                                                 foreach ( $link_terms as $t ) {
@@ -524,9 +526,13 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                         return;
                     }
 
+                    if ( ! current_user_can( 'edit_post', $post_id ) || ! current_user_can( self::get_capability() ) ) {
+                        return;
+                    }
+
                     if ( isset( $_POST['wpclv_link'] ) ) {
                         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-                        $link        = self::sanitize_array( wp_unslash( $_POST['wpclv_link'] ?? '' ) );
+                        $link        = self::sanitize_link( self::sanitize_array( wp_unslash( $_POST['wpclv_link'] ?? '' ) ) );
                         $link_source = $link['source'] ?? 'products';
 
                         if ( $link_source === 'products' ) {
@@ -587,6 +593,82 @@ if ( ! function_exists( 'wpclv_init' ) ) {
 
                         update_post_meta( $post_id, 'wpclv_link', $link );
                     }
+                }
+
+                // capability required to manage linked variations
+                public static function get_capability() {
+                    return apply_filters( 'wpclv_capability', 'manage_woocommerce' );
+                }
+
+                public static function get_post_type_capabilities() {
+                    $cap = self::get_capability();
+
+                    return [
+                            'edit_posts'             => $cap,
+                            'edit_others_posts'      => $cap,
+                            'edit_private_posts'     => $cap,
+                            'edit_published_posts'   => $cap,
+                            'publish_posts'          => $cap,
+                            'read_private_posts'     => $cap,
+                            'delete_posts'           => $cap,
+                            'delete_private_posts'   => $cap,
+                            'delete_published_posts' => $cap,
+                            'delete_others_posts'    => $cap,
+                            'create_posts'           => $cap,
+                    ];
+                }
+
+                // the source must be 'products' or a taxonomy of products, otherwise fall back to 'products'
+                public static function sanitize_source( $source ) {
+                    $source = is_scalar( $source ) ? (string) $source : '';
+
+                    if ( in_array( $source, [ 'products', 'categories', 'tags' ], true ) ) {
+                        return $source;
+                    }
+
+                    if ( $source !== '' && in_array( $source, get_object_taxonomies( 'product' ), true ) ) {
+                        return $source;
+                    }
+
+                    return 'products';
+                }
+
+                // sanitize and whitelist the values of a link configuration
+                public static function sanitize_link( $link ) {
+                    $link = is_array( $link ) ? $link : [];
+
+                    $link['source'] = self::sanitize_source( $link['source'] ?? 'products' );
+
+                    if ( isset( $link['limit'] ) ) {
+                        $link['limit'] = (int) $link['limit'];
+                    }
+
+                    if ( isset( $link['orderby'] ) ) {
+                        $orderby_values  = [ 'default', 'none', 'ID', 'name', 'type', 'rand', 'date', 'price', 'modified' ];
+                        $link['orderby'] = in_array( $link['orderby'], $orderby_values, true ) ? $link['orderby'] : 'default';
+                    }
+
+                    if ( isset( $link['order'] ) ) {
+                        $link['order'] = in_array( $link['order'], [ 'default', 'DESC', 'ASC' ], true ) ? $link['order'] : 'default';
+                    }
+
+                    if ( isset( $link['terms_all'] ) ) {
+                        $link['terms_all'] = ! empty( $link['terms_all'] ) ? '1' : '';
+                    }
+
+                    foreach ( [ 'terms', 'categories', 'tags' ] as $key ) {
+                        if ( isset( $link[ $key ] ) ) {
+                            $link[ $key ] = is_scalar( $link[ $key ] ) ? implode( ',', array_filter( array_map( 'sanitize_text_field', explode( ',', (string) $link[ $key ] ) ) ) ) : '';
+                        }
+                    }
+
+                    foreach ( [ 'attributes', 'images', 'swatches', 'dropdown' ] as $key ) {
+                        if ( isset( $link[ $key ] ) ) {
+                            $link[ $key ] = array_values( array_filter( array_map( 'sanitize_text_field', array_filter( (array) $link[ $key ], 'is_scalar' ) ) ) );
+                        }
+                    }
+
+                    return $link;
                 }
 
                 function sanitize_array( $arr ) {
@@ -1882,7 +1964,7 @@ if ( ! function_exists( 'wpclv_init' ) ) {
                 }
 
                 function ajax_search_term() {
-                    if ( ! isset( $_REQUEST['security'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['security'] ) ), 'wpclv_nonce' ) ) {
+                    if ( ! isset( $_REQUEST['security'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['security'] ) ), 'wpclv_nonce' ) || ! current_user_can( self::get_capability() ) ) {
                         wp_send_json( [] );
                     }
 

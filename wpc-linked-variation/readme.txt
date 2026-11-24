@@ -3,7 +3,7 @@ Contributors: wpclever
 Donate link: https://wpclever.net
 Tags: woocommerce, wpc, linked variations, variation
 Tested up to: 7.1
-Stable tag: 4.6.0
+Stable tag: 4.6.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,6 +82,10 @@ Good luck and enjoy our plugin.
 4. Go to WP-admin > WPClever > Linked Variation to add linked variations
 
 == Changelog ==
+
+= 4.6.1 =
+* Fixed: Security issue (stored XSS via the link source) - validate and sanitize the link configuration
+* Updated: Restrict managing linked variations to users with the 'manage_woocommerce' capability (filterable via 'wpclv_capability')
 
 = 4.6.0 =
 * Added: Cache option and 'Clear cache' button on the settings page
